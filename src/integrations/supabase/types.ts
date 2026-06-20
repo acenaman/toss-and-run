@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cloud_snapshots: {
+        Row: {
+          active_match_id: string | null
+          client_updated_at: number
+          created_at: string
+          device_id: string
+          id: string
+          matches: Json
+          teams: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active_match_id?: string | null
+          client_updated_at?: number
+          created_at?: string
+          device_id?: string
+          id?: string
+          matches?: Json
+          teams?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active_match_id?: string | null
+          client_updated_at?: number
+          created_at?: string
+          device_id?: string
+          id?: string
+          matches?: Json
+          teams?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
