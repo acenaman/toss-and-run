@@ -30,7 +30,7 @@ function Splash() {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center gully-gradient stadium-grain">
       <img
-        src={/logo_transparent.png}
+        src="/logo_transparent.png"
         alt="Gully Cricket Scorer logo"
         className="w-44 h-44 object-contain animate-logo-spin drop-shadow-[0_0_30px_rgba(255,122,26,0.45)]"
       />
