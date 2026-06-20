@@ -31,6 +31,8 @@ export function OpenersScreen() {
   const empty = inn.balls.length === 0 && !inn.currentStrikerId && !inn.currentBowlerId;
 
   const submit = () => {
+    if (!striker || !bowler || !keeper) return;
+    if (match.rules.nonStriker && (!nonStriker || nonStriker === striker)) return;
     if (isFirstInnings) {
       setOpeners(striker, match.rules.nonStriker ? nonStriker : undefined, bowler, keeper);
     } else if (empty) {
@@ -63,7 +65,7 @@ export function OpenersScreen() {
         <Select label="Opening Bowler" value={bowler} onChange={setBowler} options={bowlingTeam.players} exclude={[]} />
         <Select label="Wicketkeeper" value={keeper} onChange={setKeeper} options={bowlingTeam.players} exclude={[]} />
       </Card>
-      <Button className="w-full h-12" onClick={submit}>Start Scoring</Button>
+      <Button className="w-full h-12" onClick={submit} disabled={!striker || !bowler || !keeper || (match.rules.nonStriker && (!nonStriker || nonStriker === striker))}>Start Scoring</Button>
     </div>
   );
 }
