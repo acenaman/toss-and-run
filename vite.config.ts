@@ -28,7 +28,7 @@ export default defineConfig({
               options: { cacheName: "gcs-pages", networkTimeoutSeconds: 4 },
             },
             {
-              urlPattern: ({ url }) => url.origin === self.location.origin && /\/assets\/.*\.[a-f0-9]{8,}\./.test(url.pathname),
+              urlPattern: ({ sameOrigin, url }) => sameOrigin && /\/assets\/.*\.[a-f0-9]{8,}\./.test(url.pathname),
               handler: "CacheFirst",
               options: { cacheName: "gcs-assets" },
             },
