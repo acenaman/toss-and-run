@@ -1,0 +1,19 @@
+{
+  "name": "Gully Cricket Scorer",
+  "short_name": "GullyScore",
+  "description": "Offline-first gully cricket scorer with full match, stats, history and teams.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#ff7a1a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/__l5e/assets-v1/c2b79163-9731-4f07-81c9-d7461b4e9f39/logo.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
