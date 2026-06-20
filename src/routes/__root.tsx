@@ -10,7 +10,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import logoAsset from "../assets/logo.png.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { useApp } from "@/lib/store";
@@ -67,15 +66,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Gully Cricket Scorer" },
       { property: "og:description", content: "Score gully cricket matches with full rules, history and stats." },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: logoAsset.url },
+      // 👇 FIX: Points OpenGraph directly to the absolute deployment path of your transparent logo
+      { property: "og:image", content: "/logo_transparent.png" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: logoAsset.url },
+      { name: "twitter:image", content: "/logo_transparent.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: 'icon', href: '/public/favicon.ico', type: 'image/x-icon' },
-      { rel: "apple-touch-icon", href: logoAsset.url },
+      // 👇 FIX: Dropped '/public' from the path so it reads directly from root root domain
+      { rel: 'icon', href: '/logo_transparent.png', type: 'image/png' },
+      { rel: "apple-touch-icon", href: "/logo_transparent.png" },
     ],
   }),
   shellComponent: RootShell,
