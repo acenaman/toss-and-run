@@ -13,7 +13,7 @@ function AppLayout() {
     <div className="min-h-screen flex flex-col bg-background">
       <header className="sticky top-0 z-30 gully-gradient stadium-grain border-b border-border/50">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <img src={logoAsset.url} alt="" className="w-10 h-10 object-contain" />
+          <img src='/logo-transparent.png' alt="" className="w-10 h-10 object-contain" />
           <div>
             <h1 className="text-lg leading-none tracking-wide">GULLY CRICKET SCORER</h1>
             <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Score · Stats · Share</p>
