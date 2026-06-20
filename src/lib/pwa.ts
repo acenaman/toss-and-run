@@ -1,5 +1,3 @@
-import { registerSW } from "virtual:pwa-register";
-
 const PREVIEW_HOSTS = ["lovableproject.com", "lovableproject-dev.com", "beta.lovable.dev"];
 
 function shouldRefuseServiceWorker() {
@@ -23,5 +21,6 @@ export async function setupPwa() {
     await unregisterAppServiceWorkers();
     return;
   }
+  const { registerSW } = await import("virtual:pwa-register");
   registerSW({ immediate: true });
 }
