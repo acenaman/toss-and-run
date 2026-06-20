@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import logoAsset from "@/assets/logo.png.asset.json";
 import { useApp } from "@/lib/store";
 
 export const Route = createFileRoute("/")({
@@ -22,13 +21,13 @@ function Splash() {
 
   useEffect(() => {
     if (!ready) return;
-    // If there's an in-progress match, resume it.
     const live = activeId ? matches.find((m) => m.id === activeId && m.status === "in_progress") : null;
     navigate({ to: live ? "/match" : "/match" });
   }, [ready, activeId, matches, navigate]);
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center gully-gradient stadium-grain">
+    /* 👇 FIX: Replaced 'stadium-grain' with a clean background utility so CSS stops looking for the old asset */
+    <div className="min-h-screen w-full flex flex-col items-center justify-center gully-gradient bg-opacity-95 bg-neutral-950">
       <img
         src="/logo_transparent.png"
         alt="Gully Cricket Scorer logo"
