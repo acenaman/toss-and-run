@@ -83,7 +83,7 @@ export function isInningsOver(m: Match, inn: Innings): boolean {
   if (inn.legalBalls >= m.settings.overs * 6) return true;
   // All out: when wickets == players - 1, except single-person-can-bat
   const teamSize = m.teams[inn.battingTeamIndex].players.length;
-  const maxWickets = m.rules.singlePersonCanBat ? teamSize : teamSize - 1;
+  const maxWickets = Math.max(1, m.rules.singlePersonCanBat ? teamSize : teamSize - 1);
   if (inn.totalWickets >= maxWickets) return true;
   // Chase target reached (innings 2)
   if (m.currentInningsIndex === 1) {
@@ -101,7 +101,7 @@ export function computeResult(m: Match): { winnerIndex: 0 | 1 | -1; text: string
   }
   if (b.totalRuns > a.totalRuns) {
     const teamSize = m.teams[b.battingTeamIndex].players.length;
-    const maxWickets = m.rules.singlePersonCanBat ? teamSize : teamSize - 1;
+    const maxWickets = Math.max(1, m.rules.singlePersonCanBat ? teamSize : teamSize - 1);
     const wktsLeft = maxWickets - b.totalWickets;
     return {
       winnerIndex: b.battingTeamIndex,
