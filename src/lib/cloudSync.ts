@@ -1,6 +1,7 @@
 import { lovable } from "@/integrations/lovable";
 import { supabase } from "@/integrations/supabase/client";
 import { storage } from "./storage";
+import type { Json } from "@/integrations/supabase/types";
 import type { Match, SavedTeam } from "./types";
 
 export type CloudUser = { id: string; email?: string };
@@ -35,11 +36,11 @@ export async function readCloudSnapshot() {
 export async function writeCloudSnapshot(input: { teams: SavedTeam[]; matches: Match[]; activeMatchId: string | null; clientUpdatedAt?: number }) {
   const user = await getCloudUser();
   if (!user) return;
-  const clientUpdatedAt = input.clientUpdatedAt ?? storage.getClientUpdatedAt() || Date.now();
+  const clientUpdatedAt = input.clientUpdatedAt ?? (storage.getClientUpdatedAt() || Date.now());
   const { error } = await supabase.from("cloud_snapshots").upsert({
     user_id: user.id,
-    teams: input.teams,
-    matches: input.matches,
+    teams: input.teams as unknown as Json,
+    matches: input.matches as unknown as Json,
     active_match_id: input.activeMatchId,
     client_updated_at: clientUpdatedAt,
     device_id: storage.getDeviceId(),
