@@ -34,12 +34,16 @@ export function CloudSyncStatus() {
       const remote = await readCloudSnapshot();
       const localUpdatedAt = storage.getClientUpdatedAt();
       if (remote && remote.client_updated_at > localUpdatedAt) {
-        replaceLocalData({
-          teams: remote.teams as unknown as SavedTeam[],
-          matches: remote.matches as unknown as Match[],
-          activeMatchId: remote.active_match_id,
-          clientUpdatedAt: remote.client_updated_at,
+        const merged = mergeSnapshots({
+          localTeams: useApp.getState().teams,
+          localMatches: useApp.getState().matches,
+          localActive: useApp.getState().activeMatchId,
+          remoteTeams: remote.teams as unknown as SavedTeam[],
+          remoteMatches: remote.matches as unknown as Match[],
+          remoteActive: remote.active_match_id,
         });
+        replaceLocalData({ ...merged, clientUpdatedAt: Date.now() });
+        await writeCloudSnapshot({ ...merged, clientUpdatedAt: storage.getClientUpdatedAt() });
         markSynced("idle", "Cloud data loaded");
         if (reason === "manual") toast.success("Cloud data loaded");
       } else {
@@ -92,4 +96,20 @@ export function CloudSyncStatus() {
       </button>
     </div>
   );
+}
+
+function mergeSnapshots(input: { localTeams: SavedTeam[]; localMatches: Match[]; localActive: string | null; remoteTeams: SavedTeam[]; remoteMatches: Match[]; remoteActive: string | null }) {
+  const teams = mergeById(input.localTeams, input.remoteTeams);
+  const matches = mergeById(input.localMatches, input.remoteMatches);
+  const activeMatchId = input.localActive && matches.some((m) => m.id === input.localActive && m.status === "in_progress") ? input.localActive : input.remoteActive;
+  return { teams, matches, activeMatchId };
+}
+
+function mergeById<T extends { id: string; updatedAt?: number }>(local: T[], remote: T[]) {
+  const map = new Map<string, T>();
+  [...remote, ...local].forEach((item) => {
+    const old = map.get(item.id);
+    if (!old || (item.updatedAt ?? 0) >= (old.updatedAt ?? 0)) map.set(item.id, item);
+  });
+  return [...map.values()];
 }
