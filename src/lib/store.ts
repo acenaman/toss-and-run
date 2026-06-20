@@ -150,9 +150,13 @@ export const useApp = create<AppState>((set, get) => ({
 
   hydrate: () => {
     if (get().hydrated) return;
+    const matches = storage.getMatches().map((m) => {
+      const missingCaptains = !m.teams[0].captainId || !m.teams[1].captainId || !m.teams[0].wicketkeeperId || !m.teams[1].wicketkeeperId;
+      return m.status === "in_progress" && !m.toss && missingCaptains ? { ...m, needsRules: true } : m;
+    });
     set({
       teams: storage.getTeams(),
-      matches: storage.getMatches(),
+      matches,
       activeMatchId: storage.getActiveMatchId(),
       hydrated: true,
     });
@@ -251,6 +255,7 @@ export const useApp = create<AppState>((set, get) => ({
   recordBall: ({ type, runs = 0, wicket }) => {
     withActive(set, get, (m) => {
       const inn = getCurrentInnings(m);
+      if (m.status !== "in_progress" || inn.done) return;
       if (!inn.currentStrikerId || !inn.currentBowlerId) return;
       const bowlerId = inn.currentBowlerId;
       const strikerId = inn.currentStrikerId;
@@ -440,6 +445,8 @@ export const useApp = create<AppState>((set, get) => ({
           m.winnerIndex = r.winnerIndex;
           m.resultText = r.text;
           m.status = "completed";
+        } else {
+          m.currentInningsIndex = 1;
         }
       }
     });
