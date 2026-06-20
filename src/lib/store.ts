@@ -454,6 +454,15 @@ export const useApp = create<AppState>((set, get) => ({
 
   undoLastBall: () => {
     withActive(set, get, (m) => {
+      if (m.status === "completed") {
+        m.status = "in_progress";
+        m.winnerIndex = undefined;
+        m.resultText = undefined;
+      }
+      if (m.currentInningsIndex === 1 && m.innings[1].balls.length === 0 && m.innings[0].done) {
+        m.currentInningsIndex = 0;
+        m.innings[0].done = false;
+      }
       const inn = getCurrentInnings(m);
       const last = inn.balls.pop();
       if (!last) return;
