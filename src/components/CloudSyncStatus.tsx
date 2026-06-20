@@ -13,6 +13,7 @@ export function CloudSyncStatus() {
   const matches = useApp((s) => s.matches);
   const activeMatchId = useApp((s) => s.activeMatchId);
   const syncStatus = useApp((s) => s.syncStatus);
+  const syncMessage = useApp((s) => s.syncMessage);
   const replaceLocalData = useApp((s) => s.replaceLocalData);
   const markSynced = useApp((s) => s.markSynced);
 
@@ -82,7 +83,7 @@ export function CloudSyncStatus() {
 
   return (
     <div className="flex items-center gap-1.5">
-      <button className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-2.5 py-1 text-[11px] text-secondary-foreground" onClick={() => void syncNow("manual")} disabled={busy}>
+      <button title={syncMessage ?? undefined} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-2.5 py-1 text-[11px] text-secondary-foreground" onClick={() => void syncNow("manual")} disabled={busy}>
         {syncStatus === "offline" || syncStatus === "error" ? <CloudOff className="h-3 w-3" /> : <Cloud className="h-3 w-3" />}
         {busy ? "Syncing" : syncStatus === "offline" ? "Offline" : "Synced"}
       </button>
