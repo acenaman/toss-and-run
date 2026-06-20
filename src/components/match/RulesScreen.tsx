@@ -40,12 +40,12 @@ export function RulesScreen() {
       toast.error("Name the Rellu Katta player");
       return;
     }
-    const teams = match.teams;
-    teams[0].captainId = captainT1;
-    teams[0].wicketkeeperId = keeperT1;
-    teams[1].captainId = captainT2;
-    teams[1].wicketkeeperId = keeperT2;
-    updateMatch({ ...match, rules: r, teams });
+    const teams = match.teams.map((team, index) => ({
+      ...team,
+      captainId: index === 0 ? captainT1 : captainT2,
+      wicketkeeperId: index === 0 ? keeperT1 : keeperT2,
+    })) as typeof match.teams;
+    updateMatch({ ...match, rules: r, teams, needsRules: false });
     toast.success("Rules saved — proceed to toss");
   };
 
