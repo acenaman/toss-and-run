@@ -68,8 +68,12 @@ interface AppState {
   matches: Match[];
   activeMatchId: string | null;
   hydrated: boolean;
+  syncStatus: "guest" | "idle" | "syncing" | "offline" | "error";
+  syncMessage: string | null;
 
   hydrate: () => void;
+  replaceLocalData: (input: { teams: SavedTeam[]; matches: Match[]; activeMatchId: string | null; clientUpdatedAt?: number }) => void;
+  markSynced: (status?: AppState["syncStatus"], message?: string | null) => void;
 
   // Teams CRUD
   upsertTeam: (t: SavedTeam) => void;
@@ -112,6 +116,7 @@ function persist(get: () => AppState) {
   storage.setTeams(s.teams);
   storage.setMatches(s.matches);
   storage.setActiveMatchId(s.activeMatchId);
+  storage.markClientUpdated();
 }
 
 function activeMatch(s: AppState): Match | null {
@@ -135,6 +140,8 @@ export const useApp = create<AppState>((set, get) => ({
   matches: [],
   activeMatchId: null,
   hydrated: false,
+  syncStatus: "guest",
+  syncMessage: null,
 
   hydrate: () => {
     if (get().hydrated) return;
@@ -145,6 +152,16 @@ export const useApp = create<AppState>((set, get) => ({
       hydrated: true,
     });
   },
+
+  replaceLocalData: ({ teams, matches, activeMatchId, clientUpdatedAt }) => {
+    set({ teams, matches, activeMatchId, hydrated: true });
+    storage.setTeams(teams);
+    storage.setMatches(matches);
+    storage.setActiveMatchId(activeMatchId);
+    storage.setClientUpdatedAt(clientUpdatedAt ?? Date.now());
+  },
+
+  markSynced: (status = "idle", message = null) => set({ syncStatus: status, syncMessage: message }),
 
   upsertTeam: (t) => {
     set((s) => {
@@ -171,6 +188,7 @@ export const useApp = create<AppState>((set, get) => ({
       status: "in_progress",
       settings,
       rules,
+      needsRules: true,
       teams,
       innings: [emptyInnings(0), emptyInnings(1)],
       currentInningsIndex: 0,
@@ -201,6 +219,7 @@ export const useApp = create<AppState>((set, get) => ({
   setToss: (winnerIndex, decision) => {
     withActive(set, get, (m) => {
       m.toss = { winnerIndex, decision };
+      m.needsRules = false;
       const battingFirst: 0 | 1 = decision === "bat" ? winnerIndex : (winnerIndex === 0 ? 1 : 0) as 0 | 1;
       m.battingFirstIndex = battingFirst;
       m.innings[0] = emptyInnings(battingFirst);
