@@ -67,16 +67,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Score gully cricket matches with full rules, history and stats." },
       { property: "og:type", content: "website" },
       // 👇 FIX: Points OpenGraph directly to the absolute deployment path of your transparent logo
-      { property: "og:image", content: "/logo_transparent.png" },
+      { property: "og:image", content: "/logo-transparent.png" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "/logo_transparent.png" },
+      { name: "twitter:image", content: "/logo-transparent.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
       // 👇 FIX: Dropped '/public' from the path so it reads directly from root root domain
       { rel: 'icon', href: '/favicon.ico', type: 'image/png' },
-      { rel: "apple-touch-icon", href: "/logo_transparent.png" },
+      { rel: "apple-touch-icon", href: "/logo-transparent.png" },
     ],
   }),
   shellComponent: RootShell,
