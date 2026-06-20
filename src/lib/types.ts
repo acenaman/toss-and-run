@@ -181,6 +181,7 @@ export interface Match {
   manOfTheMatchTeamIndex?: 0 | 1;
   // Rellu Katta runtime state
   rk?: { currentBattingTeam?: 0 | 1; currentBowlingTeam?: 0 | 1 };
+  needsRules?: boolean;
 }
 
 export interface AggregateStats {
