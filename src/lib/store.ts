@@ -124,13 +124,18 @@ function activeMatch(s: AppState): Match | null {
   return s.matches.find((m) => m.id === s.activeMatchId) ?? null;
 }
 
+function cloneMatch(m: Match): Match {
+  return typeof structuredClone === "function" ? structuredClone(m) : JSON.parse(JSON.stringify(m));
+}
+
 function withActive(set: any, get: any, fn: (m: Match) => void) {
   set((s: AppState) => {
-    const m = activeMatch(s);
-    if (!m) return s;
-    fn(m);
-    m.updatedAt = Date.now();
-    return { matches: [...s.matches] };
+    const current = activeMatch(s);
+    if (!current) return s;
+    const nextMatch = cloneMatch(current);
+    fn(nextMatch);
+    nextMatch.updatedAt = Date.now();
+    return { matches: s.matches.map((m) => (m.id === nextMatch.id ? nextMatch : m)) };
   });
   persist(get);
 }
