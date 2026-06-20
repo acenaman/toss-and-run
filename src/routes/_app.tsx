@@ -2,6 +2,7 @@ import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import { Trophy, History, Users, ClipboardList } from "lucide-react";
 import logoAsset from "@/assets/logo.png.asset.json";
 import { cn } from "@/lib/utils";
+import { CloudSyncStatus } from "@/components/CloudSyncStatus";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
@@ -17,6 +18,7 @@ function AppLayout() {
             <h1 className="text-lg leading-none tracking-wide">GULLY CRICKET SCORER</h1>
             <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Score · Stats · Share</p>
           </div>
+          <div className="ml-auto"><CloudSyncStatus /></div>
         </div>
       </header>
       <main className="flex-1 max-w-2xl w-full mx-auto px-3 pt-3 safe-bottom">

@@ -14,7 +14,7 @@ export function MatchScreen() {
 
   // Determine phase
   if (match.status === "completed") return <SummaryScreen />;
-  if (!match.rules || (match as any)._needsRules) return <RulesScreen />;
+  if (!match.rules || match.needsRules) return <RulesScreen />;
   if (!match.toss) return <TossScreen />;
 
   const inn = match.innings[match.currentInningsIndex];

@@ -68,8 +68,12 @@ interface AppState {
   matches: Match[];
   activeMatchId: string | null;
   hydrated: boolean;
+  syncStatus: "guest" | "idle" | "syncing" | "offline" | "error";
+  syncMessage: string | null;
 
   hydrate: () => void;
+  replaceLocalData: (input: { teams: SavedTeam[]; matches: Match[]; activeMatchId: string | null; clientUpdatedAt?: number }) => void;
+  markSynced: (status?: AppState["syncStatus"], message?: string | null) => void;
 
   // Teams CRUD
   upsertTeam: (t: SavedTeam) => void;
@@ -112,6 +116,7 @@ function persist(get: () => AppState) {
   storage.setTeams(s.teams);
   storage.setMatches(s.matches);
   storage.setActiveMatchId(s.activeMatchId);
+  storage.markClientUpdated();
 }
 
 function activeMatch(s: AppState): Match | null {
@@ -119,13 +124,18 @@ function activeMatch(s: AppState): Match | null {
   return s.matches.find((m) => m.id === s.activeMatchId) ?? null;
 }
 
+function cloneMatch(m: Match): Match {
+  return typeof structuredClone === "function" ? structuredClone(m) : JSON.parse(JSON.stringify(m));
+}
+
 function withActive(set: any, get: any, fn: (m: Match) => void) {
   set((s: AppState) => {
-    const m = activeMatch(s);
-    if (!m) return s;
-    fn(m);
-    m.updatedAt = Date.now();
-    return { matches: [...s.matches] };
+    const current = activeMatch(s);
+    if (!current) return s;
+    const nextMatch = cloneMatch(current);
+    fn(nextMatch);
+    nextMatch.updatedAt = Date.now();
+    return { matches: s.matches.map((m) => (m.id === nextMatch.id ? nextMatch : m)) };
   });
   persist(get);
 }
@@ -135,16 +145,32 @@ export const useApp = create<AppState>((set, get) => ({
   matches: [],
   activeMatchId: null,
   hydrated: false,
+  syncStatus: "guest",
+  syncMessage: null,
 
   hydrate: () => {
     if (get().hydrated) return;
+    const matches = storage.getMatches().map((m) => {
+      const missingCaptains = !m.teams[0].captainId || !m.teams[1].captainId || !m.teams[0].wicketkeeperId || !m.teams[1].wicketkeeperId;
+      return m.status === "in_progress" && !m.toss && missingCaptains ? { ...m, needsRules: true } : m;
+    });
     set({
       teams: storage.getTeams(),
-      matches: storage.getMatches(),
+      matches,
       activeMatchId: storage.getActiveMatchId(),
       hydrated: true,
     });
   },
+
+  replaceLocalData: ({ teams, matches, activeMatchId, clientUpdatedAt }) => {
+    set({ teams, matches, activeMatchId, hydrated: true });
+    storage.setTeams(teams);
+    storage.setMatches(matches);
+    storage.setActiveMatchId(activeMatchId);
+    storage.setClientUpdatedAt(clientUpdatedAt ?? Date.now());
+  },
+
+  markSynced: (status = "idle", message = null) => set({ syncStatus: status, syncMessage: message }),
 
   upsertTeam: (t) => {
     set((s) => {
@@ -171,6 +197,7 @@ export const useApp = create<AppState>((set, get) => ({
       status: "in_progress",
       settings,
       rules,
+      needsRules: true,
       teams,
       innings: [emptyInnings(0), emptyInnings(1)],
       currentInningsIndex: 0,
@@ -201,6 +228,7 @@ export const useApp = create<AppState>((set, get) => ({
   setToss: (winnerIndex, decision) => {
     withActive(set, get, (m) => {
       m.toss = { winnerIndex, decision };
+      m.needsRules = false;
       const battingFirst: 0 | 1 = decision === "bat" ? winnerIndex : (winnerIndex === 0 ? 1 : 0) as 0 | 1;
       m.battingFirstIndex = battingFirst;
       m.innings[0] = emptyInnings(battingFirst);
@@ -227,6 +255,7 @@ export const useApp = create<AppState>((set, get) => ({
   recordBall: ({ type, runs = 0, wicket }) => {
     withActive(set, get, (m) => {
       const inn = getCurrentInnings(m);
+      if (m.status !== "in_progress" || inn.done) return;
       if (!inn.currentStrikerId || !inn.currentBowlerId) return;
       const bowlerId = inn.currentBowlerId;
       const strikerId = inn.currentStrikerId;
@@ -416,6 +445,8 @@ export const useApp = create<AppState>((set, get) => ({
           m.winnerIndex = r.winnerIndex;
           m.resultText = r.text;
           m.status = "completed";
+        } else {
+          m.currentInningsIndex = 1;
         }
       }
     });
@@ -423,6 +454,15 @@ export const useApp = create<AppState>((set, get) => ({
 
   undoLastBall: () => {
     withActive(set, get, (m) => {
+      if (m.status === "completed") {
+        m.status = "in_progress";
+        m.winnerIndex = undefined;
+        m.resultText = undefined;
+      }
+      if (m.currentInningsIndex === 1 && m.innings[1].balls.length === 0 && m.innings[0].done) {
+        m.currentInningsIndex = 0;
+        m.innings[0].done = false;
+      }
       const inn = getCurrentInnings(m);
       const last = inn.balls.pop();
       if (!last) return;

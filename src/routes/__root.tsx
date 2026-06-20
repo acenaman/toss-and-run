@@ -14,6 +14,7 @@ import logoAsset from "../assets/logo.png.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { useApp } from "@/lib/store";
+import { setupPwa } from "@/lib/pwa";
 
 function NotFoundComponent() {
   return (
@@ -101,6 +102,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const hydrate = useApp((s) => s.hydrate);
   useEffect(() => { hydrate(); }, [hydrate]);
+  useEffect(() => { void setupPwa(); }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
