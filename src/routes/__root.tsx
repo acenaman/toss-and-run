@@ -130,7 +130,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
       { property: "og:title", content: "Gully Cricket Scorer" },
 
-      { property: "og:description", content: "Score gully cricket matches with full rules, history and stats." },
+      { property: "og:description", content: "Offline-first gully cricket scorer — overs, players, custom rules, full scorecard, stats, and share." },
 
       { property: "og:type", content: "website" },
 
@@ -140,6 +140,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
       { name: "twitter:image", content: '/logo-transparent.png' },
 
+      { name: "twitter:title", content: "Gully Cricket Scorer" },
+      { name: "twitter:description", content: "Offline-first gully cricket scorer — overs, players, custom rules, full scorecard, stats, and share." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/J7rdvapZPNQaTccZUs6GWZKRl3C2/social-images/social-1782029055515-logo-transparent.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/J7rdvapZPNQaTccZUs6GWZKRl3C2/social-images/social-1782029055515-logo-transparent.webp" },
     ],
 
     links: [
