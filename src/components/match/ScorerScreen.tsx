@@ -463,7 +463,12 @@ function availableBatters(match: Match, inn: Innings): Player[] {
       });
   }
   const canOfferRelluKatta = inn.currentBowlerId !== "__rk__" || remaining.length === 0;
-  if (match.rules.relluKattaEnabled && match.rules.relluKattaName && !usedIds.has("__rk__") && canOfferRelluKatta) {
+  if (
+    match.rules.relluKattaEnabled &&
+    match.rules.relluKattaName &&
+    !usedIds.has("__rk__") &&
+    canOfferRelluKatta
+  ) {
     remaining.push({ id: "__rk__", name: `🪅 ${match.rules.relluKattaName} (Rellu Katta)` });
   }
   return remaining;
@@ -707,7 +712,10 @@ function NewBatsmanPrompt() {
   const remaining = availableBatters(match, inn);
   if (remaining.length === 0) return null;
   const onlyRelluWhileBowling =
-    remaining.length === 1 && remaining[0].id === "__rk__" && inn.currentBowlerId === "__rk__" && match.rules.nonStriker;
+    remaining.length === 1 &&
+    remaining[0].id === "__rk__" &&
+    inn.currentBowlerId === "__rk__" &&
+    match.rules.nonStriker;
   if (onlyRelluWhileBowling) {
     return (
       <Dialog open>
