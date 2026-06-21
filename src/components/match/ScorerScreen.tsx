@@ -441,7 +441,7 @@ function playerById(match: Match, id?: string): Player | undefined {
   return undefined;
 }
 
-function availableBatters(match: Match, inn: Innings, includeRelluIfBowling = true): Player[] {
+function availableBatters(match: Match, inn: Innings): Player[] {
   const battingTeam = match.teams[inn.battingTeamIndex];
   const usedIds = new Set(
     [
@@ -462,12 +462,8 @@ function availableBatters(match: Match, inn: Innings, includeRelluIfBowling = tr
           remaining.push(p);
       });
   }
-  if (
-    match.rules.relluKattaEnabled &&
-    match.rules.relluKattaName &&
-    !usedIds.has("__rk__") &&
-    (includeRelluIfBowling || inn.currentBowlerId !== "__rk__")
-  ) {
+  const canOfferRelluKatta = inn.currentBowlerId !== "__rk__" || remaining.length === 0;
+  if (match.rules.relluKattaEnabled && match.rules.relluKattaName && !usedIds.has("__rk__") && canOfferRelluKatta) {
     remaining.push({ id: "__rk__", name: `🪅 ${match.rules.relluKattaName} (Rellu Katta)` });
   }
   return remaining;
@@ -711,11 +707,7 @@ function NewBatsmanPrompt() {
   const remaining = availableBatters(match, inn);
   if (remaining.length === 0) return null;
   const onlyRelluWhileBowling =
-    remaining.length === 1 &&
-    remaining[0].id === "__rk__" &&
-    inn.currentBowlerId === "__rk__" &&
-    match.rules.nonStriker &&
-    !inn.currentNonStrikerId;
+    remaining.length === 1 && remaining[0].id === "__rk__" && inn.currentBowlerId === "__rk__" && match.rules.nonStriker;
   if (onlyRelluWhileBowling) {
     return (
       <Dialog open>
