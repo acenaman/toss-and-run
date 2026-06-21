@@ -157,7 +157,12 @@ export function CloudSyncStatus() {
                 <div className="text-xs text-muted-foreground">Signed in as</div>
                 <div className="font-semibold">{user.email ?? "Google account"}</div>
               </div>
-              <Button className="w-full" variant="secondary" onClick={() => void syncNow("manual")} disabled={busy}>
+              <Button
+                className="w-full"
+                variant="secondary"
+                onClick={() => void syncNow("manual")}
+                disabled={busy}
+              >
                 Sync now
               </Button>
               <Button
@@ -190,7 +195,8 @@ function mergeSnapshots(input: {
   const teams = mergeById(input.localTeams, input.remoteTeams);
   const matches = mergeById(input.localMatches, input.remoteMatches);
   const activeMatchId =
-    input.localActive && matches.some((m) => m.id === input.localActive && m.status === "in_progress")
+    input.localActive &&
+    matches.some((m) => m.id === input.localActive && m.status === "in_progress")
       ? input.localActive
       : input.remoteActive;
   return { teams, matches, activeMatchId };

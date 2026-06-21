@@ -72,7 +72,12 @@ interface AppState {
   syncMessage: string | null;
 
   hydrate: () => void;
-  replaceLocalData: (input: { teams: SavedTeam[]; matches: Match[]; activeMatchId: string | null; clientUpdatedAt?: number }) => void;
+  replaceLocalData: (input: {
+    teams: SavedTeam[];
+    matches: Match[];
+    activeMatchId: string | null;
+    clientUpdatedAt?: number;
+  }) => void;
   markSynced: (status?: AppState["syncStatus"], message?: string | null) => void;
 
   // Teams CRUD
@@ -80,14 +85,23 @@ interface AppState {
   deleteTeam: (id: ID) => void;
 
   // Match lifecycle
-  createMatch: (input: { settings: MatchSettings; teams: [TeamSquad, TeamSquad]; rules: MatchRules }) => Match;
+  createMatch: (input: {
+    settings: MatchSettings;
+    teams: [TeamSquad, TeamSquad];
+    rules: MatchRules;
+  }) => Match;
   updateMatch: (m: Match) => void;
   deleteMatch: (id: ID) => void;
   setActive: (id: ID | null) => void;
 
   // Scoring actions (mutate active match)
   setToss: (winnerIndex: 0 | 1, decision: "bat" | "bowl") => void;
-  setOpeners: (strikerId: ID, nonStrikerId: ID | undefined, bowlerId: ID, wicketkeeperId: ID) => void;
+  setOpeners: (
+    strikerId: ID,
+    nonStrikerId: ID | undefined,
+    bowlerId: ID,
+    wicketkeeperId: ID,
+  ) => void;
   recordBall: (input: RecordBallInput) => void;
   undoLastBall: () => void;
   swapStrike: () => void;
@@ -98,7 +112,12 @@ interface AppState {
   dismissOver: (keepChanges: boolean) => void;
   setMiniCheckFull: () => void;
   setNonStrikerEnabled: (enabled: boolean, nonStrikerId?: ID) => void;
-  startSecondInnings: (strikerId: ID, nonStrikerId: ID | undefined, bowlerId: ID, wicketkeeperId: ID) => void;
+  startSecondInnings: (
+    strikerId: ID,
+    nonStrikerId: ID | undefined,
+    bowlerId: ID,
+    wicketkeeperId: ID,
+  ) => void;
   finishMatch: (manOfTheMatchId?: ID, manOfTheMatchTeamIndex?: 0 | 1) => void;
   quitMatch: () => void;
   resumeMatch: (id: ID) => void;
@@ -129,7 +148,9 @@ function cloneMatch(m: Match): Match {
   return typeof structuredClone === "function" ? structuredClone(m) : JSON.parse(JSON.stringify(m));
 }
 
-type ZustandSet = (partial: Partial<AppState> | ((state: AppState) => Partial<AppState> | AppState)) => void;
+type ZustandSet = (
+  partial: Partial<AppState> | ((state: AppState) => Partial<AppState> | AppState),
+) => void;
 
 function withActive(set: ZustandSet, get: () => AppState, fn: (m: Match) => void) {
   set((s: AppState) => {
@@ -154,8 +175,14 @@ export const useApp = create<AppState>((set, get) => ({
   hydrate: () => {
     if (get().hydrated) return;
     const matches = storage.getMatches().map((m) => {
-      const missingCaptains = !m.teams[0].captainId || !m.teams[1].captainId || !m.teams[0].wicketkeeperId || !m.teams[1].wicketkeeperId;
-      return m.status === "in_progress" && !m.toss && missingCaptains ? { ...m, needsRules: true } : m;
+      const missingCaptains =
+        !m.teams[0].captainId ||
+        !m.teams[1].captainId ||
+        !m.teams[0].wicketkeeperId ||
+        !m.teams[1].wicketkeeperId;
+      return m.status === "in_progress" && !m.toss && missingCaptains
+        ? { ...m, needsRules: true }
+        : m;
     });
     set({
       teams: storage.getTeams(),
@@ -173,7 +200,8 @@ export const useApp = create<AppState>((set, get) => ({
     storage.setClientUpdatedAt(clientUpdatedAt ?? Date.now());
   },
 
-  markSynced: (status = "idle", message = null) => set({ syncStatus: status, syncMessage: message }),
+  markSynced: (status = "idle", message = null) =>
+    set({ syncStatus: status, syncMessage: message }),
 
   upsertTeam: (t) => {
     set((s) => {
@@ -211,7 +239,9 @@ export const useApp = create<AppState>((set, get) => ({
   },
 
   updateMatch: (m) => {
-    set((s) => ({ matches: s.matches.map((x) => (x.id === m.id ? { ...m, updatedAt: Date.now() } : x)) }));
+    set((s) => ({
+      matches: s.matches.map((x) => (x.id === m.id ? { ...m, updatedAt: Date.now() } : x)),
+    }));
     persist(get);
   },
 
@@ -232,7 +262,8 @@ export const useApp = create<AppState>((set, get) => ({
     withActive(set, get, (m) => {
       m.toss = { winnerIndex, decision };
       m.needsRules = false;
-      const battingFirst: 0 | 1 = decision === "bat" ? winnerIndex : (winnerIndex === 0 ? 1 : 0) as 0 | 1;
+      const battingFirst: 0 | 1 =
+        decision === "bat" ? winnerIndex : ((winnerIndex === 0 ? 1 : 0) as 0 | 1);
       m.battingFirstIndex = battingFirst;
       m.innings[0] = emptyInnings(battingFirst);
       m.innings[1] = emptyInnings((battingFirst === 0 ? 1 : 0) as 0 | 1);
@@ -251,7 +282,7 @@ export const useApp = create<AppState>((set, get) => ({
       if (m.rules.nonStriker && nonStrikerId) ensureBatter(inn, nonStrikerId);
       ensureBowler(inn, bowlerId);
       // last-ball free hit may apply to ball 6 of an over (handled at record-time)
-      if (m.rules.lastBallFreeHit && (inn.legalBalls % 6) === 5) inn.freeHitNext = true;
+      if (m.rules.lastBallFreeHit && inn.legalBalls % 6 === 5) inn.freeHitNext = true;
     });
   },
 
@@ -321,8 +352,14 @@ export const useApp = create<AppState>((set, get) => ({
           ball.runs = runs;
           batter.balls += 1; // count ball faced
           batter.runs += runs;
-          if (runs === 4) { batter.fours += 1; bowler.fours += 1; }
-          if (runs === 6) { batter.sixes += 1; bowler.sixes += 1; }
+          if (runs === 4) {
+            batter.fours += 1;
+            bowler.fours += 1;
+          }
+          if (runs === 6) {
+            batter.sixes += 1;
+            bowler.sixes += 1;
+          }
           if (runs % 2 === 1) ball.swapEnds = true;
           if (m.rules.freeHitAfterNoBall) inn.freeHitNext = true;
           break;
@@ -368,7 +405,13 @@ export const useApp = create<AppState>((set, get) => ({
         ball.wicket = wicket;
         // On free hit, only run-out (and certain rule-based) dismissals count.
         // For gully simplicity: if it's a free hit and dismissal isn't Run Out / Obstructing / Hit Ball Twice, treat as no wicket.
-        const allowedOnFH = ["Run Out", "Obstructing the Field", "Hit the Ball Twice", "Hit Wicket", "Stumped"];
+        const allowedOnFH = [
+          "Run Out",
+          "Obstructing the Field",
+          "Hit the Ball Twice",
+          "Hit Wicket",
+          "Stumped",
+        ];
         const counts = !isFreeHit || allowedOnFH.includes(wicket.type);
         if (counts) {
           inn.totalWickets += 1;
@@ -385,8 +428,10 @@ export const useApp = create<AppState>((set, get) => ({
           if (wicket.type === "Caught" || wicket.type === "Caught And Bowled") {
             if (wicket.fielderId) ensureFielder(inn, wicket.fielderId).catches += 1;
           }
-          if (wicket.type === "Run Out" && wicket.fielderId) ensureFielder(inn, wicket.fielderId).runouts += 1;
-          if (wicket.type === "Stumped" && inn.wicketkeeperId) ensureFielder(inn, inn.wicketkeeperId).stumpings += 1;
+          if (wicket.type === "Run Out" && wicket.fielderId)
+            ensureFielder(inn, wicket.fielderId).runouts += 1;
+          if (wicket.type === "Stumped" && inn.wicketkeeperId)
+            ensureFielder(inn, inn.wicketkeeperId).stumpings += 1;
           // remove the out batsman from crease
           if (inn.currentStrikerId === wicket.outBatsmanId) inn.currentStrikerId = undefined;
           if (inn.currentNonStrikerId === wicket.outBatsmanId) inn.currentNonStrikerId = undefined;
@@ -441,7 +486,12 @@ export const useApp = create<AppState>((set, get) => ({
         inn.miniCheckBowlerId = undefined;
         inn.bowlerPromptMode = "nextOver";
         inn.excludedBowlerIdForPrompt = undefined;
-      } else if (ball.isLegal && inn.miniCheckThisOver && !inn.miniCheckPending && inn.legalBalls % 6 === 3) {
+      } else if (
+        ball.isLegal &&
+        inn.miniCheckThisOver &&
+        !inn.miniCheckPending &&
+        inn.legalBalls % 6 === 3
+      ) {
         inn.miniCheckPending = true;
         inn.miniCheckBowlerId = bowlerId;
         inn.currentBowlerId = undefined;
@@ -513,7 +563,8 @@ export const useApp = create<AppState>((set, get) => ({
       b.dismissal = "retired";
       if (replacementId) ensureBatter(inn, replacementId);
       if (inn.currentStrikerId === retiringId) inn.currentStrikerId = replacementId;
-      if (inn.currentNonStrikerId === retiringId) inn.currentNonStrikerId = m.rules.nonStriker ? replacementId : undefined;
+      if (inn.currentNonStrikerId === retiringId)
+        inn.currentNonStrikerId = m.rules.nonStriker ? replacementId : undefined;
     });
   },
 
@@ -658,7 +709,9 @@ export const useApp = create<AppState>((set, get) => ({
     set((s) => {
       const m = s.matches.find((x) => x.id === id);
       if (!m) return s;
-      const next = s.matches.map((x) => (x.id === id ? { ...x, status: "in_progress" as const } : x));
+      const next = s.matches.map((x) =>
+        x.id === id ? { ...x, status: "in_progress" as const } : x,
+      );
       return { matches: next, activeMatchId: id };
     });
     persist(get);
@@ -675,16 +728,26 @@ function formatDismissal(m: Match, w: Wicket): string {
   const bowler = nameFor(m, m.innings[m.currentInningsIndex].currentBowlerId);
   const fielder = w.fielderId ? nameFor(m, w.fielderId) : undefined;
   switch (w.type) {
-    case "Bowled": return `b ${bowler}`;
-    case "LBW": return `lbw b ${bowler}`;
-    case "Caught": return `c ${fielder ?? "sub"} b ${bowler}`;
-    case "Caught And Bowled": return `c & b ${bowler}`;
-    case "Stumped": return `st ${m.innings[m.currentInningsIndex].wicketkeeperId ? nameFor(m, m.innings[m.currentInningsIndex].wicketkeeperId) : "wk"} b ${bowler}`;
-    case "Run Out": return `run out${fielder ? ` (${fielder})` : ""}`;
-    case "Hit Wicket": return `hit wicket b ${bowler}`;
-    case "Obstructing the Field": return "obstructing the field";
-    case "Hit the Ball Twice": return "hit the ball twice";
-    case "Timed Out": return "timed out";
+    case "Bowled":
+      return `b ${bowler}`;
+    case "LBW":
+      return `lbw b ${bowler}`;
+    case "Caught":
+      return `c ${fielder ?? "sub"} b ${bowler}`;
+    case "Caught And Bowled":
+      return `c & b ${bowler}`;
+    case "Stumped":
+      return `st ${m.innings[m.currentInningsIndex].wicketkeeperId ? nameFor(m, m.innings[m.currentInningsIndex].wicketkeeperId) : "wk"} b ${bowler}`;
+    case "Run Out":
+      return `run out${fielder ? ` (${fielder})` : ""}`;
+    case "Hit Wicket":
+      return `hit wicket b ${bowler}`;
+    case "Obstructing the Field":
+      return "obstructing the field";
+    case "Hit the Ball Twice":
+      return "hit the ball twice";
+    case "Timed Out":
+      return "timed out";
   }
 }
 
@@ -744,8 +807,14 @@ function rebuildInnings(m: Match, inn: Innings, kept: BallEvent[]) {
       inn.totalRuns += ball.extraRuns + ball.runs;
       batter.balls += 1;
       batter.runs += ball.runs;
-      if (ball.runs === 4) { batter.fours += 1; bowler.fours += 1; }
-      if (ball.runs === 6) { batter.sixes += 1; bowler.sixes += 1; }
+      if (ball.runs === 4) {
+        batter.fours += 1;
+        bowler.fours += 1;
+      }
+      if (ball.runs === 6) {
+        batter.sixes += 1;
+        bowler.sixes += 1;
+      }
     } else if (ball.extraType === "bye") {
       inn.extras.byes += ball.extraRuns;
       inn.totalRuns += ball.extraRuns;
@@ -762,8 +831,14 @@ function rebuildInnings(m: Match, inn: Innings, kept: BallEvent[]) {
       batter.balls += 1;
       batter.runs += ball.runs;
       bowler.runsConceded += ball.runs;
-      if (ball.runs === 4) { batter.fours += 1; bowler.fours += 1; }
-      if (ball.runs === 6) { batter.sixes += 1; bowler.sixes += 1; }
+      if (ball.runs === 4) {
+        batter.fours += 1;
+        bowler.fours += 1;
+      }
+      if (ball.runs === 6) {
+        batter.sixes += 1;
+        bowler.sixes += 1;
+      }
       if (ball.runs === 0 && !ball.wicket) bowler.dots += 1;
     }
     if (ball.wicket) {
@@ -778,11 +853,16 @@ function rebuildInnings(m: Match, inn: Innings, kept: BallEvent[]) {
         batsmanOutId: ball.wicket.outBatsmanId,
       });
       if (shouldCreditBowlerForWicket(ball.wicket.type)) bowler.wickets += 1;
-      if ((ball.wicket.type === "Caught" || ball.wicket.type === "Caught And Bowled") && ball.wicket.fielderId) {
+      if (
+        (ball.wicket.type === "Caught" || ball.wicket.type === "Caught And Bowled") &&
+        ball.wicket.fielderId
+      ) {
         ensureFielder(inn, ball.wicket.fielderId).catches += 1;
       }
-      if (ball.wicket.type === "Run Out" && ball.wicket.fielderId) ensureFielder(inn, ball.wicket.fielderId).runouts += 1;
-      if (ball.wicket.type === "Stumped" && inn.wicketkeeperId) ensureFielder(inn, inn.wicketkeeperId).stumpings += 1;
+      if (ball.wicket.type === "Run Out" && ball.wicket.fielderId)
+        ensureFielder(inn, ball.wicket.fielderId).runouts += 1;
+      if (ball.wicket.type === "Stumped" && inn.wicketkeeperId)
+        ensureFielder(inn, inn.wicketkeeperId).stumpings += 1;
       if (inn.currentStrikerId === ball.wicket.outBatsmanId) inn.currentStrikerId = undefined;
       if (inn.currentNonStrikerId === ball.wicket.outBatsmanId) inn.currentNonStrikerId = undefined;
     }

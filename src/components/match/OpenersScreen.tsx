@@ -17,16 +17,33 @@ export function OpenersScreen() {
   ]);
   const remainingBatters = battingTeam.players.filter((p) => !usedBatters.has(p.id));
   const battersPool: Player[] = [...remainingBatters];
-  if (match.rules.relluKattaEnabled && match.rules.relluKattaName && inn.currentBowlerId !== "__rk__") {
+  if (
+    match.rules.relluKattaEnabled &&
+    match.rules.relluKattaName &&
+    inn.currentBowlerId !== "__rk__"
+  ) {
     // Allow rellu-katta to bat if not already batting for opposite team
     battersPool.push({ id: "__rk__", name: `🪅 ${match.rules.relluKattaName} (Rellu Katta)` });
   }
-  const [striker, setStriker] = useState<string>(inn.currentStrikerId ?? remainingBatters[0]?.id ?? "");
-  const [nonStriker, setNonStriker] = useState<string>(inn.currentNonStrikerId ?? remainingBatters[1]?.id ?? "");
-  const [bowler, setBowler] = useState<string>(inn.currentBowlerId ?? bowlingTeam.players[0]?.id ?? "");
-  const [keeper, setKeeper] = useState<string>(inn.wicketkeeperId ?? bowlingTeam.wicketkeeperId ?? bowlingTeam.players[0]?.id ?? "");
+  const [striker, setStriker] = useState<string>(
+    inn.currentStrikerId ?? remainingBatters[0]?.id ?? "",
+  );
+  const [nonStriker, setNonStriker] = useState<string>(
+    inn.currentNonStrikerId ?? remainingBatters[1]?.id ?? "",
+  );
+  const [bowler, setBowler] = useState<string>(
+    inn.currentBowlerId ?? bowlingTeam.players[0]?.id ?? "",
+  );
+  const [keeper, setKeeper] = useState<string>(
+    inn.wicketkeeperId ?? bowlingTeam.wicketkeeperId ?? bowlingTeam.players[0]?.id ?? "",
+  );
   const bowlersPool: Player[] = [...bowlingTeam.players];
-  if (match.rules.relluKattaEnabled && match.rules.relluKattaName && striker !== "__rk__" && nonStriker !== "__rk__") {
+  if (
+    match.rules.relluKattaEnabled &&
+    match.rules.relluKattaName &&
+    striker !== "__rk__" &&
+    nonStriker !== "__rk__"
+  ) {
     bowlersPool.push({ id: "__rk__", name: `🪅 ${match.rules.relluKattaName} (Rellu Katta)` });
   }
 
@@ -53,33 +70,91 @@ export function OpenersScreen() {
       <h2 className="text-2xl">{title}</h2>
       {!isFirstInnings && empty && (
         <Card className="p-3 text-sm bg-accent/10 border-accent/30">
-          Innings break — target: <b>{match.innings[0].totalRuns + 1}</b> in {match.settings.overs} overs.
+          Innings break — target: <b>{match.innings[0].totalRuns + 1}</b> in {match.settings.overs}{" "}
+          overs.
         </Card>
       )}
       <Card className="p-4 space-y-3">
         <div className="text-sm text-muted-foreground">🏏 Batting — {battingTeam.name}</div>
-        <Select label="Striker" value={striker} onChange={setStriker} options={battersPool} exclude={[nonStriker]} />
+        <Select
+          label="Striker"
+          value={striker}
+          onChange={setStriker}
+          options={battersPool}
+          exclude={[nonStriker]}
+        />
         {match.rules.nonStriker && (
-          <Select label="Non-Striker" value={nonStriker} onChange={setNonStriker} options={battersPool} exclude={[striker]} />
+          <Select
+            label="Non-Striker"
+            value={nonStriker}
+            onChange={setNonStriker}
+            options={battersPool}
+            exclude={[striker]}
+          />
         )}
       </Card>
       <Card className="p-4 space-y-3">
         <div className="text-sm text-muted-foreground">🎯 Bowling — {bowlingTeam.name}</div>
-        <Select label="Opening Bowler" value={bowler} onChange={setBowler} options={bowlersPool} exclude={[]} />
-        <Select label="Wicketkeeper" value={keeper} onChange={setKeeper} options={bowlingTeam.players} exclude={[]} />
+        <Select
+          label="Opening Bowler"
+          value={bowler}
+          onChange={setBowler}
+          options={bowlersPool}
+          exclude={[]}
+        />
+        <Select
+          label="Wicketkeeper"
+          value={keeper}
+          onChange={setKeeper}
+          options={bowlingTeam.players}
+          exclude={[]}
+        />
       </Card>
-      <Button className="w-full h-12" onClick={submit} disabled={!striker || !bowler || !keeper || (match.rules.nonStriker && (!nonStriker || nonStriker === striker))}>Start Scoring</Button>
+      <Button
+        className="w-full h-12"
+        onClick={submit}
+        disabled={
+          !striker ||
+          !bowler ||
+          !keeper ||
+          (match.rules.nonStriker && (!nonStriker || nonStriker === striker))
+        }
+      >
+        Start Scoring
+      </Button>
     </div>
   );
 }
 
-function Select({ label, value, onChange, options, exclude }: { label: string; value: string; onChange: (v: string) => void; options: Player[]; exclude: string[]; }) {
+function Select({
+  label,
+  value,
+  onChange,
+  options,
+  exclude,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: Player[];
+  exclude: string[];
+}) {
   return (
     <label className="block">
       <div className="text-xs text-muted-foreground mb-1">{label}</div>
-      <select value={value} onChange={(e) => onChange(e.target.value)} className="bg-input rounded-md px-3 py-2 w-full text-sm">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="bg-input rounded-md px-3 py-2 w-full text-sm"
+      >
         <option value="">— select —</option>
-        {options.filter((p) => !exclude.includes(p.id)).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+        {options
+          .filter((p) => !exclude.includes(p.id))
+          .map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
       </select>
     </label>
   );

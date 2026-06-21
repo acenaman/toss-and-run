@@ -189,32 +189,38 @@ export interface Match {
 }
 
 export interface AggregateStats {
-  byPlayer: Record<ID, {
-    name: string;
-    matches: number;
-    innings: number;
-    runs: number;
-    ballsFaced: number;
-    notOuts: number;
-    fours: number;
-    sixes: number;
-    highScore: number;
-    // bowling
-    bowlInnings: number;
-    ballsBowled: number;
-    runsConceded: number;
-    wickets: number;
-    dotBalls: number;
-    // fielding
-    catches: number;
-    runouts: number;
-    stumpings: number;
-  }>;
-  byTeam: Record<string, {
-    name: string;
-    matches: number;
-    wins: number;
-    losses: number;
-    ties: number;
-  }>;
+  byPlayer: Record<
+    ID,
+    {
+      name: string;
+      matches: number;
+      innings: number;
+      runs: number;
+      ballsFaced: number;
+      notOuts: number;
+      fours: number;
+      sixes: number;
+      highScore: number;
+      // bowling
+      bowlInnings: number;
+      ballsBowled: number;
+      runsConceded: number;
+      wickets: number;
+      dotBalls: number;
+      // fielding
+      catches: number;
+      runouts: number;
+      stumpings: number;
+    }
+  >;
+  byTeam: Record<
+    string,
+    {
+      name: string;
+      matches: number;
+      wins: number;
+      losses: number;
+      ties: number;
+    }
+  >;
 }
