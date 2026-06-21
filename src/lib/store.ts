@@ -91,12 +91,13 @@ interface AppState {
   recordBall: (input: RecordBallInput) => void;
   undoLastBall: () => void;
   swapStrike: () => void;
-  retireBatsman: () => void;
+  retireBatsman: (retiringId: ID, replacementId?: ID) => void;
   changeWicketkeeper: (newKeeperId: ID) => void;
   setNextBowler: (bowlerId: ID, miniCheck: boolean) => void;
   selectNewBatsman: (playerId: ID) => void;
   dismissOver: (keepChanges: boolean) => void;
   setMiniCheckFull: () => void;
+  setNonStrikerEnabled: (enabled: boolean, nonStrikerId?: ID) => void;
   startSecondInnings: (strikerId: ID, nonStrikerId: ID | undefined, bowlerId: ID, wicketkeeperId: ID) => void;
   finishMatch: (manOfTheMatchId?: ID, manOfTheMatchTeamIndex?: 0 | 1) => void;
   quitMatch: () => void;
@@ -128,7 +129,9 @@ function cloneMatch(m: Match): Match {
   return typeof structuredClone === "function" ? structuredClone(m) : JSON.parse(JSON.stringify(m));
 }
 
-function withActive(set: any, get: any, fn: (m: Match) => void) {
+type ZustandSet = (partial: Partial<AppState> | ((state: AppState) => Partial<AppState> | AppState)) => void;
+
+function withActive(set: ZustandSet, get: () => AppState, fn: (m: Match) => void) {
   set((s: AppState) => {
     const current = activeMatch(s);
     if (!current) return s;
@@ -434,6 +437,16 @@ export const useApp = create<AppState>((set, get) => ({
         inn.previousBowlerId = bowlerId;
         inn.currentBowlerId = undefined; // prompt for next bowler
         inn.miniCheckThisOver = false;
+        inn.miniCheckPending = false;
+        inn.miniCheckBowlerId = undefined;
+        inn.bowlerPromptMode = "nextOver";
+        inn.excludedBowlerIdForPrompt = undefined;
+      } else if (ball.isLegal && inn.miniCheckThisOver && !inn.miniCheckPending && inn.legalBalls % 6 === 3) {
+        inn.miniCheckPending = true;
+        inn.miniCheckBowlerId = bowlerId;
+        inn.currentBowlerId = undefined;
+        inn.bowlerPromptMode = "miniCheck";
+        inn.excludedBowlerIdForPrompt = bowlerId;
       }
 
       // Innings end check
@@ -469,6 +482,13 @@ export const useApp = create<AppState>((set, get) => ({
       // Naive but safe: rebuild from scratch is expensive, instead recompute innings from kept balls.
       const kept = inn.balls;
       rebuildInnings(m, inn, kept);
+      if (kept.length === 0) {
+        inn.currentStrikerId = last.batsmanOnStrike;
+        inn.currentNonStrikerId = last.nonStriker;
+        inn.currentBowlerId = last.bowlerId;
+        inn.bowlerPromptMode = undefined;
+        inn.excludedBowlerIdForPrompt = undefined;
+      }
     });
   },
 
@@ -483,15 +503,17 @@ export const useApp = create<AppState>((set, get) => ({
     });
   },
 
-  retireBatsman: () => {
+  retireBatsman: (retiringId, replacementId) => {
     withActive(set, get, (m) => {
       const inn = getCurrentInnings(m);
-      if (!inn.currentStrikerId) return;
-      const b = ensureBatter(inn, inn.currentStrikerId);
+      if (retiringId !== inn.currentStrikerId && retiringId !== inn.currentNonStrikerId) return;
+      const b = ensureBatter(inn, retiringId);
       b.retired = true;
       b.out = false;
       b.dismissal = "retired";
-      inn.currentStrikerId = undefined;
+      if (replacementId) ensureBatter(inn, replacementId);
+      if (inn.currentStrikerId === retiringId) inn.currentStrikerId = replacementId;
+      if (inn.currentNonStrikerId === retiringId) inn.currentNonStrikerId = m.rules.nonStriker ? replacementId : undefined;
     });
   },
 
@@ -506,6 +528,10 @@ export const useApp = create<AppState>((set, get) => ({
       const inn = getCurrentInnings(m);
       inn.currentBowlerId = bowlerId;
       inn.miniCheckThisOver = miniCheck;
+      inn.miniCheckPending = false;
+      inn.miniCheckBowlerId = undefined;
+      inn.bowlerPromptMode = undefined;
+      inn.excludedBowlerIdForPrompt = undefined;
       ensureBowler(inn, bowlerId);
     });
   },
@@ -516,6 +542,11 @@ export const useApp = create<AppState>((set, get) => ({
       ensureBatter(inn, playerId);
       if (!inn.currentStrikerId) inn.currentStrikerId = playerId;
       else if (m.rules.nonStriker && !inn.currentNonStrikerId) inn.currentNonStrikerId = playerId;
+      if (playerId === "__rk__" && inn.currentBowlerId === "__rk__") {
+        inn.currentBowlerId = undefined;
+        inn.bowlerPromptMode = "replacement";
+        inn.excludedBowlerIdForPrompt = "__rk__";
+      }
     });
   },
 
@@ -523,28 +554,66 @@ export const useApp = create<AppState>((set, get) => ({
     withActive(set, get, (m) => {
       const inn = getCurrentInnings(m);
       if (keepChanges) {
-        // mark current over invalid by clearing currentBowler; balls remain (rare path)
+        const currentBowlerId = inn.currentBowlerId;
+        const currentOverIdx = Math.floor(inn.legalBalls / 6);
+        inn.balls.forEach((b) => {
+          if (b.overNumber === currentOverIdx) {
+            b.isLegal = false;
+            b.ballInOver = 0;
+          }
+        });
+        rebuildInnings(m, inn, inn.balls);
         inn.currentBowlerId = undefined;
+        inn.bowlerPromptMode = "replacement";
+        inn.excludedBowlerIdForPrompt = currentBowlerId;
+        inn.miniCheckThisOver = false;
+        inn.miniCheckPending = false;
+        inn.miniCheckBowlerId = undefined;
         return;
       }
-      // Remove balls in current over (since current over start)
-      const startOfOver = Math.floor(inn.legalBalls / 6) * 6;
-      const keepBalls = inn.balls.filter((b) => {
-        // any ball before reaching startOfOver legal balls counted
-        return false; // simpler — rebuild
-      });
-      // Walk through balls and keep those whose ball.overNumber < currentOver
-      const currentOverIdx = Math.floor((inn.legalBalls === 0 ? 0 : inn.legalBalls - 1) / 6);
+      const currentBowlerId = inn.currentBowlerId;
+      const currentOverIdx = Math.floor(inn.legalBalls / 6);
       const filtered = inn.balls.filter((b) => b.overNumber < currentOverIdx);
       rebuildInnings(m, inn, filtered);
       inn.currentBowlerId = undefined;
+      inn.bowlerPromptMode = "replacement";
+      inn.excludedBowlerIdForPrompt = currentBowlerId;
+      inn.miniCheckThisOver = false;
+      inn.miniCheckPending = false;
+      inn.miniCheckBowlerId = undefined;
+    });
+  },
+
+  setNonStrikerEnabled: (enabled, nonStrikerId) => {
+    withActive(set, get, (m) => {
+      const inn = getCurrentInnings(m);
+      m.rules.nonStriker = enabled;
+      m.rules.singlePersonCanBat = !enabled;
+      if (!enabled) {
+        if (!inn.currentStrikerId && inn.currentNonStrikerId) {
+          inn.currentStrikerId = inn.currentNonStrikerId;
+        } else if (inn.currentNonStrikerId) {
+          const b = ensureBatter(inn, inn.currentNonStrikerId);
+          b.retired = true;
+          b.dismissal = "retired";
+        }
+        inn.currentNonStrikerId = undefined;
+      } else if (nonStrikerId && nonStrikerId !== inn.currentStrikerId) {
+        ensureBatter(inn, nonStrikerId);
+        inn.currentNonStrikerId = nonStrikerId;
+      }
     });
   },
 
   setMiniCheckFull: () => {
     withActive(set, get, (m) => {
       const inn = getCurrentInnings(m);
+      inn.currentBowlerId = inn.miniCheckBowlerId;
       inn.miniCheckThisOver = false;
+      inn.miniCheckPending = false;
+      inn.miniCheckBowlerId = undefined;
+      inn.bowlerPromptMode = undefined;
+      inn.excludedBowlerIdForPrompt = undefined;
     });
   },
 

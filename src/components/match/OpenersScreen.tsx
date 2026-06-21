@@ -17,15 +17,18 @@ export function OpenersScreen() {
   ]);
   const remainingBatters = battingTeam.players.filter((p) => !usedBatters.has(p.id));
   const battersPool: Player[] = [...remainingBatters];
-  if (match.rules.relluKattaEnabled && match.rules.relluKattaName && match.rk?.currentBattingTeam !== (inn.battingTeamIndex === 0 ? 1 : 0)) {
+  if (match.rules.relluKattaEnabled && match.rules.relluKattaName && inn.currentBowlerId !== "__rk__") {
     // Allow rellu-katta to bat if not already batting for opposite team
     battersPool.push({ id: "__rk__", name: `🪅 ${match.rules.relluKattaName} (Rellu Katta)` });
   }
-
   const [striker, setStriker] = useState<string>(inn.currentStrikerId ?? remainingBatters[0]?.id ?? "");
   const [nonStriker, setNonStriker] = useState<string>(inn.currentNonStrikerId ?? remainingBatters[1]?.id ?? "");
   const [bowler, setBowler] = useState<string>(inn.currentBowlerId ?? bowlingTeam.players[0]?.id ?? "");
   const [keeper, setKeeper] = useState<string>(inn.wicketkeeperId ?? bowlingTeam.wicketkeeperId ?? bowlingTeam.players[0]?.id ?? "");
+  const bowlersPool: Player[] = [...bowlingTeam.players];
+  if (match.rules.relluKattaEnabled && match.rules.relluKattaName && striker !== "__rk__" && nonStriker !== "__rk__") {
+    bowlersPool.push({ id: "__rk__", name: `🪅 ${match.rules.relluKattaName} (Rellu Katta)` });
+  }
 
   const isFirstInnings = match.currentInningsIndex === 0;
   const empty = inn.balls.length === 0 && !inn.currentStrikerId && !inn.currentBowlerId;
@@ -62,7 +65,7 @@ export function OpenersScreen() {
       </Card>
       <Card className="p-4 space-y-3">
         <div className="text-sm text-muted-foreground">🎯 Bowling — {bowlingTeam.name}</div>
-        <Select label="Opening Bowler" value={bowler} onChange={setBowler} options={bowlingTeam.players} exclude={[]} />
+        <Select label="Opening Bowler" value={bowler} onChange={setBowler} options={bowlersPool} exclude={[]} />
         <Select label="Wicketkeeper" value={keeper} onChange={setKeeper} options={bowlingTeam.players} exclude={[]} />
       </Card>
       <Button className="w-full h-12" onClick={submit} disabled={!striker || !bowler || !keeper || (match.rules.nonStriker && (!nonStriker || nonStriker === striker))}>Start Scoring</Button>

@@ -18,7 +18,8 @@ export function MatchScreen() {
   if (!match.toss) return <TossScreen />;
 
   const inn = match.innings[match.currentInningsIndex];
-  if (!inn.currentStrikerId || (match.rules.nonStriker && !inn.currentNonStrikerId) || !inn.currentBowlerId) {
+  const needsInitialSetup = inn.balls.length === 0 && (!inn.currentStrikerId || (match.rules.nonStriker && !inn.currentNonStrikerId) || !inn.currentBowlerId);
+  if (needsInitialSetup) {
     return <OpenersScreen />;
   }
   return <ScorerScreen />;

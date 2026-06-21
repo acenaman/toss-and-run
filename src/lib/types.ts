@@ -134,12 +134,16 @@ export interface Innings {
   currentNonStrikerId?: ID;
   currentBowlerId?: ID;
   previousBowlerId?: ID;
+  bowlerPromptMode?: "nextOver" | "replacement" | "miniCheck";
+  excludedBowlerIdForPrompt?: ID;
   totalRuns: number;
   totalWickets: number;
   legalBalls: number; // total legal balls bowled in innings
   freeHitNext: boolean;
   // mini-check state for current over
   miniCheckThisOver?: boolean;
+  miniCheckPending?: boolean;
+  miniCheckBowlerId?: ID;
   // bowler attribution within a single over for mini-check spells
   oversBowledByBowlerHistory: { bowlerId: ID; legalBalls: number }[];
   // tracks bowler overs (to enforce over limit)
