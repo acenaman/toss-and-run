@@ -771,7 +771,7 @@ function WicketDialog({
   allowedTypes = ALL_DISMISSALS,
 }: {
   mode: "bat";
-  rules: any;
+  rules: MatchRules;
   batters: Player[];
   fielders: Player[];
   onPick: (w: Wicket) => void;
@@ -882,7 +882,7 @@ function ExtraDialog({
   rules,
 }: {
   type: "wide" | "noball" | "bye" | "legbye";
-  rules: any;
+  rules: MatchRules;
   batters: Player[];
   fielders: Player[];
   wicketkeeperId?: string;
