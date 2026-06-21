@@ -134,12 +134,16 @@ export interface Innings {
   currentNonStrikerId?: ID;
   currentBowlerId?: ID;
   previousBowlerId?: ID;
+  bowlerPromptMode?: "nextOver" | "replacement" | "miniCheck";
+  excludedBowlerIdForPrompt?: ID;
   totalRuns: number;
   totalWickets: number;
   legalBalls: number; // total legal balls bowled in innings
   freeHitNext: boolean;
   // mini-check state for current over
   miniCheckThisOver?: boolean;
+  miniCheckPending?: boolean;
+  miniCheckBowlerId?: ID;
   // bowler attribution within a single over for mini-check spells
   oversBowledByBowlerHistory: { bowlerId: ID; legalBalls: number }[];
   // tracks bowler overs (to enforce over limit)
@@ -185,32 +189,38 @@ export interface Match {
 }
 
 export interface AggregateStats {
-  byPlayer: Record<ID, {
-    name: string;
-    matches: number;
-    innings: number;
-    runs: number;
-    ballsFaced: number;
-    notOuts: number;
-    fours: number;
-    sixes: number;
-    highScore: number;
-    // bowling
-    bowlInnings: number;
-    ballsBowled: number;
-    runsConceded: number;
-    wickets: number;
-    dotBalls: number;
-    // fielding
-    catches: number;
-    runouts: number;
-    stumpings: number;
-  }>;
-  byTeam: Record<string, {
-    name: string;
-    matches: number;
-    wins: number;
-    losses: number;
-    ties: number;
-  }>;
+  byPlayer: Record<
+    ID,
+    {
+      name: string;
+      matches: number;
+      innings: number;
+      runs: number;
+      ballsFaced: number;
+      notOuts: number;
+      fours: number;
+      sixes: number;
+      highScore: number;
+      // bowling
+      bowlInnings: number;
+      ballsBowled: number;
+      runsConceded: number;
+      wickets: number;
+      dotBalls: number;
+      // fielding
+      catches: number;
+      runouts: number;
+      stumpings: number;
+    }
+  >;
+  byTeam: Record<
+    string,
+    {
+      name: string;
+      matches: number;
+      wins: number;
+      losses: number;
+      ties: number;
+    }
+  >;
 }

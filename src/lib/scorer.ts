@@ -82,7 +82,8 @@ export function isInningsOver(m: Match, inn: Innings): boolean {
   // Overs limit
   if (inn.legalBalls >= m.settings.overs * 6) return true;
   // All out: when wickets == players - 1, except single-person-can-bat
-  const teamSize = m.teams[inn.battingTeamIndex].players.length;
+  const teamSize =
+    m.teams[inn.battingTeamIndex].players.length + (m.rules.relluKattaEnabled ? 1 : 0);
   const maxWickets = Math.max(1, m.rules.singlePersonCanBat ? teamSize : teamSize - 1);
   if (inn.totalWickets >= maxWickets) return true;
   // Chase target reached (innings 2)
@@ -123,7 +124,8 @@ export function commentaryFor(ball: BallEvent): string {
   if (ball.extraType === "noball") return `No Ball${ball.runs ? ` + ${ball.runs}` : ""}`;
   if (ball.extraType === "bye") return `Bye ${ball.runs}`;
   if (ball.extraType === "legbye") return `Leg Bye ${ball.runs}`;
-  if (ball.extraType === "penalty") return `Penalty +${ball.extraRuns}`;
+  if (ball.extraType === "penalty")
+    return `Penalty ${ball.extraRuns > 0 ? "+" : ""}${ball.extraRuns}`;
   if (ball.runs === 6) return "SIX!";
   if (ball.runs === 4) return "FOUR!";
   if (ball.runs === 0) return "Dot";
