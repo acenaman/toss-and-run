@@ -34,8 +34,8 @@ export function TeamsScreen() {
               <div className="text-xs text-muted-foreground">{t.players.length} player{t.players.length === 1 ? "" : "s"}</div>
             </div>
             <div className="flex gap-2">
-              <Button size="sm" variant="secondary" onClick={() => setEditing(t)}><Pencil className="w-4 h-4" /></Button>
-              <Button size="sm" variant="destructive" onClick={() => { if (confirm(`Delete ${t.name}?`)) { deleteTeam(t.id); toast.success("Team deleted"); } }}><Trash2 className="w-4 h-4" /></Button>
+              <Button size="sm" variant="secondary" aria-label="Edit team" onClick={() => setEditing(t)}><Pencil className="w-4 h-4" /></Button>
+              <Button size="sm" variant="destructive" aria-label="Delete team" onClick={() => { if (confirm(`Delete ${t.name}?`)) { deleteTeam(t.id); toast.success("Team deleted"); } }}><Trash2 className="w-4 h-4" /></Button>
             </div>
           </div>
           <div className="flex flex-wrap gap-1.5 mt-3">
@@ -95,7 +95,7 @@ export function TeamEditor({
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Team name" />
           <div className="flex gap-2">
             <Input value={newPlayer} onChange={(e) => setNewPlayer(e.target.value)} placeholder="Player name" onKeyDown={(e) => e.key === "Enter" && addPlayer()} />
-            <Button onClick={addPlayer}><Plus className="w-4 h-4" /></Button>
+            <Button onClick={addPlayer} aria-label="Add player"><Plus className="w-4 h-4" /></Button>
           </div>
           <div className="space-y-2 max-h-[40vh] overflow-y-auto">
             {players.map((p) => (
@@ -106,11 +106,11 @@ export function TeamEditor({
                   <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-xs">{p.name.slice(0, 2).toUpperCase()}</div>
                 )}
                 <div className="flex-1">{p.name}</div>
-                <label className="cursor-pointer text-muted-foreground hover:text-foreground">
+                <label className="cursor-pointer text-muted-foreground hover:text-foreground" aria-label="Add player photo">
                   <Camera className="w-4 h-4" />
                   <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && onPhoto(p.id, e.target.files[0])} />
                 </label>
-                <button onClick={() => removePlayer(p.id)} className="text-destructive"><X className="w-4 h-4" /></button>
+                <button onClick={() => removePlayer(p.id)} className="text-destructive" aria-label="Remove player"><X className="w-4 h-4" /></button>
               </div>
             ))}
           </div>

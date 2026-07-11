@@ -15,9 +15,9 @@ function Stepper({ value, onChange, min, max, label, allowUnlimited }: { value: 
         {allowUnlimited && (
           <Button size="sm" variant={value === null ? "default" : "secondary"} onClick={() => onChange(value === null ? min : null)}>∞</Button>
         )}
-        <Button size="icon" variant="secondary" onClick={() => onChange(Math.max(min, (value ?? min) - 1))} disabled={value === null}><Minus className="w-3 h-3" /></Button>
+        <Button size="icon" variant="secondary" aria-label="Decrease" onClick={() => onChange(Math.max(min, (value ?? min) - 1))} disabled={value === null}><Minus className="w-3 h-3" /></Button>
         <span className="font-mono w-10 text-center font-semibold">{value === null ? "∞" : value}</span>
-        <Button size="icon" variant="secondary" onClick={() => onChange(Math.min(max, (value ?? min) + 1))} disabled={value === null}><Plus className="w-3 h-3" /></Button>
+        <Button size="icon" variant="secondary" aria-label="Increase" onClick={() => onChange(Math.min(max, (value ?? min) + 1))} disabled={value === null}><Plus className="w-3 h-3" /></Button>
       </div>
     </div>
   );
@@ -159,10 +159,10 @@ function TeamPicker({ label, expected, draft, setDraft, otherSourceId }: { label
         </div>
       )}
 
-      <div className="flex gap-2">
-        <Input value={newPlayer} onChange={(e) => setNewPlayer(e.target.value)} placeholder="Add player" onKeyDown={(e) => e.key === "Enter" && addPlayer()} />
-        <Button onClick={addPlayer}><Plus className="w-4 h-4" /></Button>
-      </div>
+          <div className="flex gap-2">
+            <Input value={newPlayer} onChange={(e) => setNewPlayer(e.target.value)} placeholder="Add player" onKeyDown={(e) => e.key === "Enter" && addPlayer()} />
+            <Button onClick={addPlayer} aria-label="Add player"><Plus className="w-4 h-4" /></Button>
+          </div>
 
       <div className="space-y-1.5">
         {draft.players.map((p, i) => (
@@ -174,11 +174,11 @@ function TeamPicker({ label, expected, draft, setDraft, otherSourceId }: { label
               <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-[10px]">{p.name.slice(0, 2).toUpperCase()}</div>
             )}
             <span className="flex-1">{p.name}</span>
-            <label className="cursor-pointer text-muted-foreground">
+            <label className="cursor-pointer text-muted-foreground" aria-label="Add player photo">
               <Camera className="w-3.5 h-3.5" />
               <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && onPhoto(p.id, e.target.files[0])} />
             </label>
-            <button onClick={() => removePlayer(p.id)} className="text-destructive"><X className="w-3.5 h-3.5" /></button>
+            <button onClick={() => removePlayer(p.id)} className="text-destructive" aria-label="Remove player"><X className="w-3.5 h-3.5" /></button>
           </div>
         ))}
       </div>

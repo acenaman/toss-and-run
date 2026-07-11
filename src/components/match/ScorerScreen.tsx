@@ -133,6 +133,7 @@ export function ScorerScreen() {
             <Button
               size="sm"
               variant="destructive"
+              aria-label="Quit match"
               onClick={() => {
                 if (confirm("Quit match? Saved as 'quitted'.")) {
                   quitMatch();
