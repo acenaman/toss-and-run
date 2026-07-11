@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GuideDigitalScoringRouteImport } from './routes/guide.digital-scoring'
 import { Route as AppTeamsRouteImport } from './routes/_app.teams'
 import { Route as AppStatsRouteImport } from './routes/_app.stats'
 import { Route as AppMatchRouteImport } from './routes/_app.match'
@@ -23,6 +24,11 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuideDigitalScoringRoute = GuideDigitalScoringRouteImport.update({
+  id: '/guide/digital-scoring',
+  path: '/guide/digital-scoring',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppTeamsRoute = AppTeamsRouteImport.update({
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/match': typeof AppMatchRoute
   '/stats': typeof AppStatsRoute
   '/teams': typeof AppTeamsRoute
+  '/guide/digital-scoring': typeof GuideDigitalScoringRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/match': typeof AppMatchRoute
   '/stats': typeof AppStatsRoute
   '/teams': typeof AppTeamsRoute
+  '/guide/digital-scoring': typeof GuideDigitalScoringRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -68,12 +76,25 @@ export interface FileRoutesById {
   '/_app/match': typeof AppMatchRoute
   '/_app/stats': typeof AppStatsRoute
   '/_app/teams': typeof AppTeamsRoute
+  '/guide/digital-scoring': typeof GuideDigitalScoringRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/history' | '/match' | '/stats' | '/teams'
+  fullPaths:
+    | '/'
+    | '/history'
+    | '/match'
+    | '/stats'
+    | '/teams'
+    | '/guide/digital-scoring'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/history' | '/match' | '/stats' | '/teams'
+  to:
+    | '/'
+    | '/history'
+    | '/match'
+    | '/stats'
+    | '/teams'
+    | '/guide/digital-scoring'
   id:
     | '__root__'
     | '/'
@@ -82,11 +103,13 @@ export interface FileRouteTypes {
     | '/_app/match'
     | '/_app/stats'
     | '/_app/teams'
+    | '/guide/digital-scoring'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  GuideDigitalScoringRoute: typeof GuideDigitalScoringRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -103,6 +126,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guide/digital-scoring': {
+      id: '/guide/digital-scoring'
+      path: '/guide/digital-scoring'
+      fullPath: '/guide/digital-scoring'
+      preLoaderRoute: typeof GuideDigitalScoringRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/teams': {
@@ -155,7 +185,18 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  GuideDigitalScoringRoute: GuideDigitalScoringRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
