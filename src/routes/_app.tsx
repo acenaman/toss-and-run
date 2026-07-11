@@ -15,7 +15,7 @@ function AppLayout() {
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           <img src='/logo-transparent.png' alt="" className="w-10 h-10 object-contain" />
           <div>
-            <h1 className="text-lg leading-none tracking-wide">GULLY CRICKET SCORER</h1>
+            <h1 className="text-lg leading-none tracking-wide">GULLY CRICKET SCORER — Digital cricket scoring</h1>
             <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Score · Stats · Share</p>
           </div>
           <div className="ml-auto"><CloudSyncStatus /></div>

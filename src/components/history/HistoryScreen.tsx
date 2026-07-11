@@ -93,7 +93,7 @@ export function HistoryScreen() {
                 </Button>
               )}
               <Button size="sm" variant="secondary" onClick={() => setView(m.id)}><FileText className="w-3 h-3 mr-1" /> Scorecard</Button>
-              <Button size="sm" variant="destructive" className="ml-auto" onClick={() => { if (confirm("Delete this match? Stats will be recalculated.")) { deleteMatch(m.id); toast.success("Match deleted"); } }}>
+              <Button size="sm" variant="destructive" className="ml-auto" aria-label="Delete match" onClick={() => { if (confirm("Delete this match? Stats will be recalculated.")) { deleteMatch(m.id); toast.success("Match deleted"); } }}>
                 <Trash2 className="w-3 h-3" />
               </Button>
             </div>
