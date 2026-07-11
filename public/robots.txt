@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://gully-cricet-scorer.lovable.app/sitemap.xml
