@@ -1,5 +1,5 @@
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
-import { Trophy, History, Users, ClipboardList } from "lucide-react";
+import { Trophy, History, Users, ClipboardList, BookOpen } from "lucide-react";
 import logoAsset from "@/assets/logo.png.asset.json";
 import { cn } from "@/lib/utils";
 import { CloudSyncStatus } from "@/components/CloudSyncStatus";
@@ -18,7 +18,16 @@ function AppLayout() {
             <h1 className="text-lg leading-none tracking-wide">GULLY CRICKET SCORER — Digital cricket scoring</h1>
             <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Score · Stats · Share</p>
           </div>
-          <div className="ml-auto"><CloudSyncStatus /></div>
+          <div className="ml-auto flex items-center gap-2">
+            <CloudSyncStatus />
+            <Link
+              to="/guide/digital-scoring"
+              aria-label="Open digital scoring guide"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80"
+            >
+              <BookOpen className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </header>
       <main className="flex-1 max-w-2xl w-full mx-auto px-3 pt-3 safe-bottom">

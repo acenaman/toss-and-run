@@ -70,7 +70,7 @@ function Splash() {
 
       />
 
-      <h1 className="mt-8 text-4xl tracking-wider text-foreground">GULLY CRICKET SCORER — Digital cricket scoring for local matches</h1>
+      <h1 className="mt-8 text-4xl tracking-wider text-foreground">GULLY CRICKET SCORER</h1>
 
       <p className="mt-2 text-sm text-muted-foreground uppercase tracking-[0.3em]">Mohalla ka maidan, apna scorecard</p>
 
