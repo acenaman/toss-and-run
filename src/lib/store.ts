@@ -839,6 +839,7 @@ function rebuildInnings(m: Match, inn: Innings, kept: BallEvent[]) {
       batter.balls += 1;
       batter.runs += ball.runs;
       bowler.runsConceded += ball.runs;
+      inn.totalRuns += ball.runs;
       if (ball.runs === 4) {
         batter.fours += 1;
         bowler.fours += 1;
