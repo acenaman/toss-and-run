@@ -122,6 +122,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
       { name: "description", content: "Offline-first gully cricket scorer — overs, players, custom rules, full scorecard, stats, and share." },
 
+      { name: "google-site-verification", content: "-3WeXfExG_fWA2-4FzGRqPToHBmwbmFYNwM073uNrc0" },
+
       { name: "apple-mobile-web-app-capable", content: "yes" },
 
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
