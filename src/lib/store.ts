@@ -532,13 +532,17 @@ export const useApp = create<AppState>((set, get) => ({
       // Naive but safe: rebuild from scratch is expensive, instead recompute innings from kept balls.
       const kept = inn.balls;
       rebuildInnings(m, inn, kept);
-      if (kept.length === 0) {
-        inn.currentStrikerId = last.batsmanOnStrike;
-        inn.currentNonStrikerId = last.nonStriker;
-        inn.currentBowlerId = last.bowlerId;
-        inn.bowlerPromptMode = undefined;
-        inn.excludedBowlerIdForPrompt = undefined;
-      }
+      inn.currentStrikerId = last.batsmanOnStrike;
+      inn.currentNonStrikerId = last.nonStriker;
+      inn.currentBowlerId = last.bowlerId;
+      inn.freeHitNext = last.isFreeHit;
+      inn.bowlerPromptMode = undefined;
+      inn.excludedBowlerIdForPrompt = undefined;
+      inn.miniCheckPending = false;
+      inn.miniCheckBowlerId = undefined;
+      ensureBatter(inn, last.batsmanOnStrike);
+      if (last.nonStriker) ensureBatter(inn, last.nonStriker);
+      ensureBowler(inn, last.bowlerId);
     });
   },
 
@@ -791,10 +795,14 @@ function rebuildInnings(m: Match, inn: Innings, kept: BallEvent[]) {
 
   for (const ball of kept) {
     // Re-apply ball as if recording
-    const striker = inn.currentStrikerId ?? ball.batsmanOnStrike;
-    const bowlerId = inn.currentBowlerId ?? ball.bowlerId;
+    inn.currentStrikerId = ball.batsmanOnStrike;
+    inn.currentNonStrikerId = ball.nonStriker;
+    inn.currentBowlerId = ball.bowlerId;
+    const striker = ball.batsmanOnStrike;
+    const bowlerId = ball.bowlerId;
     const batter = ensureBatter(inn, striker);
     const bowler = ensureBowler(inn, bowlerId);
+    inn.freeHitNext = ball.isFreeHit;
     if (ball.extraType === "wide") {
       inn.extras.wides += ball.extraRuns;
       bowler.runsConceded += ball.extraRuns;
@@ -831,6 +839,7 @@ function rebuildInnings(m: Match, inn: Innings, kept: BallEvent[]) {
       batter.balls += 1;
       batter.runs += ball.runs;
       bowler.runsConceded += ball.runs;
+      inn.totalRuns += ball.runs;
       if (ball.runs === 4) {
         batter.fours += 1;
         bowler.fours += 1;
@@ -869,6 +878,13 @@ function rebuildInnings(m: Match, inn: Innings, kept: BallEvent[]) {
     if (ball.isLegal) {
       inn.legalBalls += 1;
       bowler.ballsBowled += 1;
+      if (ball.isFreeHit) inn.freeHitNext = false;
+      const lastSpell = inn.oversBowledByBowlerHistory[inn.oversBowledByBowlerHistory.length - 1];
+      if (lastSpell && lastSpell.bowlerId === bowlerId) {
+        lastSpell.legalBalls += 1;
+      } else {
+        inn.oversBowledByBowlerHistory.push({ bowlerId, legalBalls: 1 });
+      }
     }
     if (ball.swapEnds && inn.currentStrikerId && inn.currentNonStrikerId) {
       const t = inn.currentStrikerId;
@@ -884,6 +900,12 @@ function rebuildInnings(m: Match, inn: Innings, kept: BallEvent[]) {
       inn.bowlerOverCount[bowlerId] = (inn.bowlerOverCount[bowlerId] ?? 0) + 1;
       inn.previousBowlerId = bowlerId;
       inn.currentBowlerId = undefined;
+    }
+    if (ball.extraType === "noball" && m.rules.freeHitAfterNoBall) {
+      inn.freeHitNext = true;
+    }
+    if (m.rules.lastBallFreeHit && inn.legalBalls > 0 && inn.legalBalls % 6 === 5) {
+      inn.freeHitNext = true;
     }
     inn.balls.push(ball);
   }
