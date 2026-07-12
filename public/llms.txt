@@ -1,0 +1,15 @@
+# Gully Cricket Scorer
+
+> A free, mobile-first cricket scoring app for local gully, friendly, and street cricket matches — no paper scorecard required.
+
+Gully Cricket Scorer helps you score matches ball-by-ball, track player and team stats, build leaderboards, and share scorecards instantly. It works offline and optionally syncs to the cloud so your match history stays safe across devices.
+
+## Pages
+
+- [/](/): Start screen and app entry point.
+- [/match](/match): Live scoring page where you record every ball, extras, wickets, and swaps.
+- [/stats](/stats): Player and team statistics with leaderboards, Orange Cap, and Purple Cap.
+- [/history](/history): Archive of completed, saved, and resumed matches with full scorecards.
+- [/teams](/teams): Manage teams and players for quick match setup.
+- [/guide/digital-scoring](/guide/digital-scoring): Guide to switching from paper scorecards to a digital cricket scoring app.
+- [/sitemap.xml](/sitemap.xml): Machine-readable list of public routes for search engines.
