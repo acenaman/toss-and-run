@@ -118,9 +118,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
       { name: "theme-color", content: "#ff7a1a" },
 
-      { title: "Gully Cricket Scorer" },
+      { title: "Gully Cricket Scorer — Street Cricket Scorecard & Stats" },
 
-      { name: "description", content: "Offline-first gully cricket scorer — overs, players, custom rules, full scorecard, stats, and share." },
+      { name: "description", content: "Free mobile cricket scorer for local matches. Track overs, runs, wickets, player stats, and share scorecards — offline or synced." },
 
       { name: "google-site-verification", content: "-3WeXfExG_fWA2-4FzGRqPToHBmwbmFYNwM073uNrc0" },
 
@@ -130,21 +130,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
       { name: "apple-mobile-web-app-title", content: "GullyScore" },
 
-      { property: "og:title", content: "Gully Cricket Scorer" },
+      { property: "og:title", content: "Gully Cricket Scorer — Street Cricket Scorecard & Stats" },
 
-      { property: "og:description", content: "Offline-first gully cricket scorer — overs, players, custom rules, full scorecard, stats, and share." },
+      { property: "og:description", content: "Free mobile cricket scorer for local matches. Track overs, runs, wickets, player stats, and share scorecards — offline or synced." },
 
       { property: "og:type", content: "website" },
 
-      { property: "og:image", content: '/logo-transparent.png' },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/J7rdvapZPNQaTccZUs6GWZKRl3C2/social-images/social-1782029055515-logo-transparent.webp" },
 
       { name: "twitter:card", content: "summary_large_image" },
 
-      { name: "twitter:image", content: '/logo-transparent.png' },
-
-      { name: "twitter:title", content: "Gully Cricket Scorer" },
-      { name: "twitter:description", content: "Offline-first gully cricket scorer — overs, players, custom rules, full scorecard, stats, and share." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/J7rdvapZPNQaTccZUs6GWZKRl3C2/social-images/social-1782029055515-logo-transparent.webp" },
+      { name: "twitter:title", content: "Gully Cricket Scorer — Street Cricket Scorecard & Stats" },
+      { name: "twitter:description", content: "Free mobile cricket scorer for local matches. Track overs, runs, wickets, player stats, and share scorecards — offline or synced." },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/J7rdvapZPNQaTccZUs6GWZKRl3C2/social-images/social-1782029055515-logo-transparent.webp" },
     ],
 

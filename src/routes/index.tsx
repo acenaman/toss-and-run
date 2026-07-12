@@ -8,10 +8,23 @@ import { useApp } from "@/lib/store";
 
 
 
+const DESCRIPTION = "Free mobile cricket scorer for local matches. Track overs, runs, wickets, player stats, and share scorecards — offline or synced.";
+
 export const Route = createFileRoute("/")({
-
+  head: () => ({
+    meta: [
+      { title: "Gully Cricket Scorer — Street Cricket Scorecard & Stats" },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: "Gully Cricket Scorer — Street Cricket Scorecard & Stats" },
+      { property: "og:description", content: DESCRIPTION },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://gully-cricet-scorer.lovable.app/" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://gully-cricet-scorer.lovable.app/" },
+    ],
+  }),
   component: Splash,
-
 });
 
 
