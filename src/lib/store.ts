@@ -690,12 +690,20 @@ export const useApp = create<AppState>((set, get) => ({
   finishMatch: (manOfTheMatchId, manOfTheMatchTeamIndex) => {
     withActive(set, get, (m) => {
       m.status = "completed";
-      m.manOfTheMatchId = manOfTheMatchId;
-      m.manOfTheMatchTeamIndex = manOfTheMatchTeamIndex;
       if (!m.resultText) {
         const r = computeResult(m);
         m.winnerIndex = r.winnerIndex;
         m.resultText = r.text;
+      }
+      if (manOfTheMatchId) {
+        m.manOfTheMatchId = manOfTheMatchId;
+        m.manOfTheMatchTeamIndex = manOfTheMatchTeamIndex;
+      } else if (!m.manOfTheMatchId) {
+        const mom = pickManOfTheMatch(m);
+        if (mom) {
+          m.manOfTheMatchId = mom.playerId;
+          m.manOfTheMatchTeamIndex = mom.teamIndex;
+        }
       }
     });
     set({ activeMatchId: null });
