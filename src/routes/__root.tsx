@@ -118,10 +118,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
       { name: "theme-color", content: "#ff7a1a" },
 
-      { title: "Gully Cricket Scorer — Street Cricket Scorecard & Stats" },
-
-      { name: "description", content: "Free mobile cricket scorer for local matches. Track overs, runs, wickets, player stats, and share scorecards — offline or synced." },
-
       { name: "google-site-verification", content: "-3WeXfExG_fWA2-4FzGRqPToHBmwbmFYNwM073uNrc0" },
 
       { name: "apple-mobile-web-app-capable", content: "yes" },
