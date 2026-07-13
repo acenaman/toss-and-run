@@ -509,6 +509,13 @@ export const useApp = create<AppState>((set, get) => ({
           m.winnerIndex = r.winnerIndex;
           m.resultText = r.text;
           m.status = "completed";
+          if (!m.manOfTheMatchId) {
+            const mom = pickManOfTheMatch(m);
+            if (mom) {
+              m.manOfTheMatchId = mom.playerId;
+              m.manOfTheMatchTeamIndex = mom.teamIndex;
+            }
+          }
         } else {
           m.currentInningsIndex = 1;
         }
