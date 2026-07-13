@@ -121,23 +121,25 @@ export function CloudSyncStatus() {
   return (
     <div className="flex items-center gap-1.5">
       <button
-        title={syncMessage ?? undefined}
-        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-2.5 py-1 text-[11px] text-secondary-foreground"
+        title={syncMessage ?? (user.email ? `Logged in: ${user.email}` : "Logged in")}
+        className="inline-flex w-[150px] items-center gap-1.5 rounded-full border border-border bg-secondary px-2.5 py-1 text-[11px] text-secondary-foreground"
         onClick={() => void syncNow("manual")}
         disabled={busy}
       >
         {syncStatus === "offline" || syncStatus === "error" ? (
-          <CloudOff className="h-3 w-3" />
+          <CloudOff className="h-3 w-3 shrink-0" />
         ) : (
-          <Cloud className="h-3 w-3" />
+          <Cloud className="h-3 w-3 shrink-0" />
         )}
-        {busy
-          ? "Syncing"
-          : syncStatus === "offline"
-            ? "Offline"
-            : user.email
-              ? `Logged in: ${user.email.split("@")[0]}`
-              : "Logged in"}
+        <span className="flex-1 truncate text-left">
+          {busy || syncStatus === "syncing"
+            ? "Syncing…"
+            : syncStatus === "offline"
+              ? "Offline"
+              : user.email
+                ? user.email.split("@")[0]
+                : "Logged in"}
+        </span>
       </button>
       <button
         aria-label="Settings"
