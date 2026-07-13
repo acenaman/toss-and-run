@@ -10,7 +10,7 @@ export const Route = createFileRoute("/guide/digital-scoring")({
   head: () => ({
     meta: [
       { title: "Cricket Scoring App: Go Digital for Your Next Local Match" },
-      { name: "description", content: "Tired of paper scorecards? Discover why a digital cricket scoring app like Gully Cricket Scorer beats pen and paper with automatic stats, match history, offline mode, and instant sharing." },
+      { name: "description", content: "Discover why a digital cricket scorer beats paper scorecards with automatic stats, match history, offline mode, and instant sharing." },
       { property: "og:title", content: "Cricket Scoring App: Go Digital for Your Next Local Match" },
       { property: "og:description", content: "Swap paper scorecards for a digital cricket scorer. Automated stats, full match history, offline support, and shareable scorecards." },
       { property: "og:type", content: "article" },
