@@ -48,6 +48,39 @@ export const Route = createFileRoute("/guide/digital-scoring")({
           },
         }),
       },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: "What is the best app for scoring my own matches?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Look for an app that is offline-first, has one-tap scoring, and saves full history. Gully Cricket Scorer is built exactly for that.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "Can I track stats without paying?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Yes. The app stores everything locally on your device for free, with optional Google cloud sync across devices.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "Can I share the scorecard on WhatsApp?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Yes. Export as PNG or PDF and share directly, or copy the scorecard summary to any chat.",
+              },
+            },
+          ],
+        }),
+      },
     ],
   }),
 });
