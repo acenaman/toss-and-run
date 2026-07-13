@@ -12,6 +12,7 @@ import {
   getCurrentInnings,
   isInningsOver,
   oversString,
+  pickManOfTheMatch,
   shouldCreditBowlerForWicket,
 } from "./scorer";
 import type {
