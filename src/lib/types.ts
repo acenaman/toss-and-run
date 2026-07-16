@@ -186,6 +186,8 @@ export interface Match {
   // Rellu Katta runtime state
   rk?: { currentBattingTeam?: 0 | 1; currentBowlingTeam?: 0 | 1 };
   needsRules?: boolean;
+  // Quick match: auto-filled teams/players, no stats aggregation, auto bowler/batsman
+  quick?: boolean;
 }
 
 export interface AggregateStats {
