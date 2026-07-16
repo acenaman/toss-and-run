@@ -79,33 +79,46 @@ export function CloudSyncStatus() {
   );
 
   useEffect(() => {
-    getCloudUser().then((u) => {
+    let cancelled = false;
+    const check = async () => {
+      const u = await getCloudUser();
+      if (cancelled) return;
       setUser(u);
       markSynced(u ? "idle" : "guest", null);
       if (u) void syncNow();
-    });
-    return onCloudAuthChange((u) => {
-      setUser(u);
-      markSynced(u ? "idle" : "guest", null);
-      if (u) void syncNow();
-    });
-  }, [markSynced, syncNow]);
-
-  useEffect(() => {
-    if (!user) return;
-    const timer = window.setTimeout(() => {
-      void syncNow();
-    }, 900);
-    return () => window.clearTimeout(timer);
-  }, [teams, matches, activeMatchId, user, syncNow]);
-
-  useEffect(() => {
-    const onOnline = () => {
-      if (user) void syncNow();
+      return u;
     };
-    window.addEventListener("online", onOnline);
-    return () => window.removeEventListener("online", onOnline);
-  }, [syncNow, user]);
+    void check();
+    // If we land here from an OAuth redirect the session may not be parsed yet — retry a few times.
+    const retries = [400, 900, 1800, 3200].map((delay) =>
+      window.setTimeout(async () => {
+        if (cancelled) return;
+        const u = await getCloudUser();
+        if (u && !cancelled) {
+          setUser((prev) => prev ?? u);
+          markSynced("idle", null);
+          void syncNow();
+        }
+      }, delay),
+    );
+    const unsub = onCloudAuthChange((u) => {
+      setUser(u);
+      markSynced(u ? "idle" : "guest", null);
+      if (u) void syncNow();
+    });
+    const onFocus = () => void check();
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("pageshow", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      cancelled = true;
+      retries.forEach((id) => window.clearTimeout(id));
+      unsub();
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("pageshow", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+  }, [markSynced, syncNow]);
 
   if (!user) {
     return (
