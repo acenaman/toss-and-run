@@ -521,6 +521,7 @@ export const useApp = create<AppState>((set, get) => ({
           }
         } else {
           m.currentInningsIndex = 1;
+          if (m.quick) autoFillOpeners(m, 1);
         }
       }
     });
@@ -746,6 +747,24 @@ export const useApp = create<AppState>((set, get) => ({
     });
   },
 }));
+
+function autoFillOpeners(m: Match, inningsIdx: 0 | 1) {
+  const inn = m.innings[inningsIdx];
+  const battingTeam = m.teams[inn.battingTeamIndex];
+  const bowlingTeam = m.teams[inn.bowlingTeamIndex];
+  const striker = battingTeam.players[0]?.id;
+  const nonStriker = battingTeam.players[1]?.id;
+  const bowler = bowlingTeam.players[0]?.id;
+  if (!striker || !bowler) return;
+  inn.currentStrikerId = striker;
+  inn.currentNonStrikerId = m.rules.nonStriker ? nonStriker : undefined;
+  inn.currentBowlerId = bowler;
+  inn.wicketkeeperId = bowlingTeam.wicketkeeperId ?? bowlingTeam.players[0]?.id;
+  ensureBatter(inn, striker);
+  if (m.rules.nonStriker && nonStriker) ensureBatter(inn, nonStriker);
+  ensureBowler(inn, bowler);
+  if (m.rules.lastBallFreeHit && inn.legalBalls % 6 === 5) inn.freeHitNext = true;
+}
 
 function formatDismissal(m: Match, w: Wicket): string {
   const bowler = nameFor(m, m.innings[m.currentInningsIndex].currentBowlerId);
