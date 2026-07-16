@@ -14,7 +14,7 @@ export function HistoryScreen() {
   const deleteMatch = useApp((s) => s.deleteMatch);
   const resumeMatch = useApp((s) => s.resumeMatch);
   const navigate = useNavigate();
-  const [filter, setFilter] = useState<"all" | "completed" | "quit">("all");
+  const [filter, setFilter] = useState<"all" | "completed" | "quit" | "quick">("all");
   const [view, setView] = useState<string | null>(null);
   const [team1, setTeam1] = useState("");
   const [team2, setTeam2] = useState("");
@@ -27,7 +27,12 @@ export function HistoryScreen() {
 
   const list = useMemo(() => {
     return matches
-      .filter((m) => filter === "all" ? m.status !== "in_progress" : m.status === filter)
+      .filter((m) => {
+        if (m.status === "in_progress") return false;
+        if (filter === "quick") return !!m.quick;
+        if (filter === "all") return !m.quick;
+        return m.status === filter && !m.quick;
+      })
       .filter((m) => {
         if (!team1) return true;
         const names = m.teams.map((t) => t.name);
