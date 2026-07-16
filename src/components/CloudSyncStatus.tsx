@@ -120,6 +120,22 @@ export function CloudSyncStatus() {
     };
   }, [markSynced, syncNow]);
 
+  useEffect(() => {
+    if (!user) return;
+    const timer = window.setTimeout(() => {
+      void syncNow();
+    }, 900);
+    return () => window.clearTimeout(timer);
+  }, [teams, matches, activeMatchId, user, syncNow]);
+
+  useEffect(() => {
+    const onOnline = () => {
+      if (user) void syncNow();
+    };
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, [syncNow, user]);
+
   if (!user) {
     return (
       <button
