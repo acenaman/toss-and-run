@@ -271,6 +271,7 @@ export const useApp = create<AppState>((set, get) => ({
       m.innings[0] = emptyInnings(battingFirst);
       m.innings[1] = emptyInnings((battingFirst === 0 ? 1 : 0) as 0 | 1);
       m.currentInningsIndex = 0;
+      if (m.quick) autoFillOpeners(m, 0);
     });
   },
 
