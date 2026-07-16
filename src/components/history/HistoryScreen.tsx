@@ -47,10 +47,11 @@ export function HistoryScreen() {
     <div className="space-y-3 pb-4">
       <h2 className="text-2xl">History</h2>
       <Tabs value={filter} onValueChange={(v) => setFilter(v as any)}>
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
           <TabsTrigger value="quit">Quitted</TabsTrigger>
+          <TabsTrigger value="quick">Quick</TabsTrigger>
         </TabsList>
       </Tabs>
       <div className="grid grid-cols-2 gap-2">
