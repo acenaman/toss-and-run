@@ -110,7 +110,9 @@ export function RulesScreen() {
         <div className="text-sm font-semibold text-primary uppercase tracking-wider">Rellu-Katta Player</div>
         <Toggle label="Enable Rellu-Katta (shared bat & bowl)" value={r.relluKattaEnabled} set={(v) => setR({ ...r, relluKattaEnabled: v })} />
         {r.relluKattaEnabled && (
-          <Input value={r.relluKattaName ?? ""} onChange={(e) => setR({ ...r, relluKattaName: e.target.value })} placeholder="Rellu Katta player name" />
+          isQuick
+            ? <div className="text-xs text-muted-foreground px-1">Named automatically: <span className="font-semibold text-foreground">Player C</span></div>
+            : <Input value={r.relluKattaName ?? ""} onChange={(e) => setR({ ...r, relluKattaName: e.target.value })} placeholder="Rellu Katta player name" />
         )}
       </Card>
 
