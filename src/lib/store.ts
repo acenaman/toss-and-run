@@ -90,6 +90,7 @@ interface AppState {
     settings: MatchSettings;
     teams: [TeamSquad, TeamSquad];
     rules: MatchRules;
+    quick?: boolean;
   }) => Match;
   updateMatch: (m: Match) => void;
   deleteMatch: (id: ID) => void;
@@ -220,7 +221,7 @@ export const useApp = create<AppState>((set, get) => ({
     persist(get);
   },
 
-  createMatch: ({ settings, teams, rules }) => {
+  createMatch: ({ settings, teams, rules, quick }) => {
     const id = uuid();
     const m: Match = {
       id,
@@ -233,6 +234,7 @@ export const useApp = create<AppState>((set, get) => ({
       teams,
       innings: [emptyInnings(0), emptyInnings(1)],
       currentInningsIndex: 0,
+      quick: quick || undefined,
     };
     set((s) => ({ matches: [...s.matches, m], activeMatchId: id }));
     persist(get);
