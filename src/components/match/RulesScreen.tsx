@@ -11,6 +11,7 @@ import { toast } from "sonner";
 export function RulesScreen() {
   const match = useApp((s) => s.matches.find((m) => m.id === s.activeMatchId)!);
   const updateMatch = useApp((s) => s.updateMatch);
+  const isQuick = !!match.quick;
   const [r, setR] = useState<MatchRules>(match.rules ?? DEFAULT_RULES);
   const [captainT1, setCaptainT1] = useState<string>(match.teams[0].captainId ?? match.teams[0].players[0]?.id ?? "");
   const [keeperT1, setKeeperT1] = useState<string>(match.teams[0].wicketkeeperId ?? match.teams[0].players[0]?.id ?? "");
@@ -36,16 +37,22 @@ export function RulesScreen() {
   );
 
   const submit = () => {
-    if (r.relluKattaEnabled && !r.relluKattaName?.trim()) {
+    const finalRules: MatchRules = {
+      ...r,
+      relluKattaName: r.relluKattaEnabled
+        ? (isQuick ? (r.relluKattaName?.trim() || "Player C") : r.relluKattaName?.trim())
+        : r.relluKattaName,
+    };
+    if (finalRules.relluKattaEnabled && !finalRules.relluKattaName) {
       toast.error("Name the Rellu Katta player");
       return;
     }
     const teams = match.teams.map((team, index) => ({
       ...team,
-      captainId: index === 0 ? captainT1 : captainT2,
-      wicketkeeperId: index === 0 ? keeperT1 : keeperT2,
+      captainId: isQuick ? team.captainId ?? team.players[0]?.id : (index === 0 ? captainT1 : captainT2),
+      wicketkeeperId: isQuick ? team.wicketkeeperId ?? team.players[0]?.id : (index === 0 ? keeperT1 : keeperT2),
     })) as typeof match.teams;
-    updateMatch({ ...match, rules: r, teams, needsRules: false });
+    updateMatch({ ...match, rules: finalRules, teams, needsRules: false });
     toast.success("Rules saved — proceed to toss");
   };
 
