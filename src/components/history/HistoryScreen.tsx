@@ -80,6 +80,7 @@ export function HistoryScreen() {
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">
                   {new Date(m.createdAt).toLocaleDateString()} · {m.settings.overs} ov
                 </div>
+                {m.quick && <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full mr-1">QUICK</span>}
                 {isQuit && <span className="text-[10px] bg-warning text-warning-foreground px-2 py-0.5 rounded-full">QUITTED</span>}
               </div>
               <div className="flex justify-between items-center">
