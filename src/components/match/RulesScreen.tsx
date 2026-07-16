@@ -60,20 +60,24 @@ export function RulesScreen() {
     <div className="space-y-3 pb-4">
       <h2 className="text-2xl">Match Rules</h2>
 
-      <Card className="p-4 space-y-3">
-        <div className="text-sm font-semibold text-primary uppercase tracking-wider">Captains & Keepers</div>
-        {([0, 1] as const).map((i) => (
-          <div key={i} className="grid grid-cols-2 gap-2">
-            <div className="col-span-2 text-xs text-muted-foreground">{match.teams[i].name}</div>
-            <select value={i === 0 ? captainT1 : captainT2} onChange={(e) => i === 0 ? setCaptainT1(e.target.value) : setCaptainT2(e.target.value)} className="bg-input rounded-md px-2 py-2 text-sm">
-              {match.teams[i].players.map((p) => <option key={p.id} value={p.id}>👑 {p.name}</option>)}
-            </select>
-            <select value={i === 0 ? keeperT1 : keeperT2} onChange={(e) => i === 0 ? setKeeperT1(e.target.value) : setKeeperT2(e.target.value)} className="bg-input rounded-md px-2 py-2 text-sm">
-              {match.teams[i].players.map((p) => <option key={p.id} value={p.id}>🧤 {p.name}</option>)}
-            </select>
-          </div>
-        ))}
-      </Card>
+      <h2 className="text-2xl">Match Rules</h2>
+
+      {!isQuick && (
+        <Card className="p-4 space-y-3">
+          <div className="text-sm font-semibold text-primary uppercase tracking-wider">Captains & Keepers</div>
+          {([0, 1] as const).map((i) => (
+            <div key={i} className="grid grid-cols-2 gap-2">
+              <div className="col-span-2 text-xs text-muted-foreground">{match.teams[i].name}</div>
+              <select value={i === 0 ? captainT1 : captainT2} onChange={(e) => i === 0 ? setCaptainT1(e.target.value) : setCaptainT2(e.target.value)} className="bg-input rounded-md px-2 py-2 text-sm">
+                {match.teams[i].players.map((p) => <option key={p.id} value={p.id}>👑 {p.name}</option>)}
+              </select>
+              <select value={i === 0 ? keeperT1 : keeperT2} onChange={(e) => i === 0 ? setKeeperT1(e.target.value) : setKeeperT2(e.target.value)} className="bg-input rounded-md px-2 py-2 text-sm">
+                {match.teams[i].players.map((p) => <option key={p.id} value={p.id}>🧤 {p.name}</option>)}
+              </select>
+            </div>
+          ))}
+        </Card>
+      )}
 
       <Card className="p-4 space-y-2">
         <div className="text-sm font-semibold text-primary uppercase tracking-wider">Extras</div>
