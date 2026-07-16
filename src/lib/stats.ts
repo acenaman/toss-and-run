@@ -29,7 +29,7 @@ export function aggregateStats(matches: Match[]): AggregateStats {
   };
 
   for (const m of matches) {
-    if (m.status !== "completed") continue;
+    if (m.status !== "completed" || m.quick) continue;
     const t1 = ensureT(m.teams[0].name);
     const t2 = ensureT(m.teams[1].name);
     t1.matches += 1; t2.matches += 1;

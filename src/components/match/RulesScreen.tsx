@@ -11,6 +11,7 @@ import { toast } from "sonner";
 export function RulesScreen() {
   const match = useApp((s) => s.matches.find((m) => m.id === s.activeMatchId)!);
   const updateMatch = useApp((s) => s.updateMatch);
+  const isQuick = !!match.quick;
   const [r, setR] = useState<MatchRules>(match.rules ?? DEFAULT_RULES);
   const [captainT1, setCaptainT1] = useState<string>(match.teams[0].captainId ?? match.teams[0].players[0]?.id ?? "");
   const [keeperT1, setKeeperT1] = useState<string>(match.teams[0].wicketkeeperId ?? match.teams[0].players[0]?.id ?? "");
@@ -36,16 +37,22 @@ export function RulesScreen() {
   );
 
   const submit = () => {
-    if (r.relluKattaEnabled && !r.relluKattaName?.trim()) {
+    const finalRules: MatchRules = {
+      ...r,
+      relluKattaName: r.relluKattaEnabled
+        ? (isQuick ? (r.relluKattaName?.trim() || "Player C") : r.relluKattaName?.trim())
+        : r.relluKattaName,
+    };
+    if (finalRules.relluKattaEnabled && !finalRules.relluKattaName) {
       toast.error("Name the Rellu Katta player");
       return;
     }
     const teams = match.teams.map((team, index) => ({
       ...team,
-      captainId: index === 0 ? captainT1 : captainT2,
-      wicketkeeperId: index === 0 ? keeperT1 : keeperT2,
+      captainId: isQuick ? team.captainId ?? team.players[0]?.id : (index === 0 ? captainT1 : captainT2),
+      wicketkeeperId: isQuick ? team.wicketkeeperId ?? team.players[0]?.id : (index === 0 ? keeperT1 : keeperT2),
     })) as typeof match.teams;
-    updateMatch({ ...match, rules: r, teams, needsRules: false });
+    updateMatch({ ...match, rules: finalRules, teams, needsRules: false });
     toast.success("Rules saved — proceed to toss");
   };
 
@@ -53,20 +60,24 @@ export function RulesScreen() {
     <div className="space-y-3 pb-4">
       <h2 className="text-2xl">Match Rules</h2>
 
-      <Card className="p-4 space-y-3">
-        <div className="text-sm font-semibold text-primary uppercase tracking-wider">Captains & Keepers</div>
-        {([0, 1] as const).map((i) => (
-          <div key={i} className="grid grid-cols-2 gap-2">
-            <div className="col-span-2 text-xs text-muted-foreground">{match.teams[i].name}</div>
-            <select value={i === 0 ? captainT1 : captainT2} onChange={(e) => i === 0 ? setCaptainT1(e.target.value) : setCaptainT2(e.target.value)} className="bg-input rounded-md px-2 py-2 text-sm">
-              {match.teams[i].players.map((p) => <option key={p.id} value={p.id}>👑 {p.name}</option>)}
-            </select>
-            <select value={i === 0 ? keeperT1 : keeperT2} onChange={(e) => i === 0 ? setKeeperT1(e.target.value) : setKeeperT2(e.target.value)} className="bg-input rounded-md px-2 py-2 text-sm">
-              {match.teams[i].players.map((p) => <option key={p.id} value={p.id}>🧤 {p.name}</option>)}
-            </select>
-          </div>
-        ))}
-      </Card>
+      <h2 className="text-2xl">Match Rules</h2>
+
+      {!isQuick && (
+        <Card className="p-4 space-y-3">
+          <div className="text-sm font-semibold text-primary uppercase tracking-wider">Captains & Keepers</div>
+          {([0, 1] as const).map((i) => (
+            <div key={i} className="grid grid-cols-2 gap-2">
+              <div className="col-span-2 text-xs text-muted-foreground">{match.teams[i].name}</div>
+              <select value={i === 0 ? captainT1 : captainT2} onChange={(e) => i === 0 ? setCaptainT1(e.target.value) : setCaptainT2(e.target.value)} className="bg-input rounded-md px-2 py-2 text-sm">
+                {match.teams[i].players.map((p) => <option key={p.id} value={p.id}>👑 {p.name}</option>)}
+              </select>
+              <select value={i === 0 ? keeperT1 : keeperT2} onChange={(e) => i === 0 ? setKeeperT1(e.target.value) : setKeeperT2(e.target.value)} className="bg-input rounded-md px-2 py-2 text-sm">
+                {match.teams[i].players.map((p) => <option key={p.id} value={p.id}>🧤 {p.name}</option>)}
+              </select>
+            </div>
+          ))}
+        </Card>
+      )}
 
       <Card className="p-4 space-y-2">
         <div className="text-sm font-semibold text-primary uppercase tracking-wider">Extras</div>
@@ -99,7 +110,9 @@ export function RulesScreen() {
         <div className="text-sm font-semibold text-primary uppercase tracking-wider">Rellu-Katta Player</div>
         <Toggle label="Enable Rellu-Katta (shared bat & bowl)" value={r.relluKattaEnabled} set={(v) => setR({ ...r, relluKattaEnabled: v })} />
         {r.relluKattaEnabled && (
-          <Input value={r.relluKattaName ?? ""} onChange={(e) => setR({ ...r, relluKattaName: e.target.value })} placeholder="Rellu Katta player name" />
+          isQuick
+            ? <div className="text-xs text-muted-foreground px-1">Named automatically: <span className="font-semibold text-foreground">Player C</span></div>
+            : <Input value={r.relluKattaName ?? ""} onChange={(e) => setR({ ...r, relluKattaName: e.target.value })} placeholder="Rellu Katta player name" />
         )}
       </Card>
 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useApp, ballShortLabel } from "@/lib/store";
 import type {
   BatterStat,
@@ -43,6 +43,43 @@ export function ScorerScreen() {
   const changeKeeper = useApp((s) => s.changeWicketkeeper);
   const setNonStrikerEnabled = useApp((s) => s.setNonStrikerEnabled);
   const quitMatch = useApp((s) => s.quitMatch);
+  const setNextBowler = useApp((s) => s.setNextBowler);
+  const selectNewBatsman = useApp((s) => s.selectNewBatsman);
+
+  // Quick match: auto-pick next bowler / next batsman so the match fast-forwards.
+  useEffect(() => {
+    if (!match.quick || inn.done) return;
+    // auto next bowler at end of over
+    if (!inn.currentBowlerId && inn.balls.length > 0) {
+      const excluded = inn.excludedBowlerIdForPrompt;
+      const prev = inn.previousBowlerId;
+      const candidates = bowlingTeam.players.filter(
+        (p) => p.id !== excluded && p.id !== prev &&
+          (match.rules.overLimit === null || (inn.bowlerOverCount[p.id] ?? 0) < match.rules.overLimit),
+      );
+      const pool = candidates.length > 0 ? candidates : bowlingTeam.players.filter((p) => p.id !== excluded);
+      if (pool.length > 0) {
+        const pick = pool.reduce((min, p) =>
+          (inn.bowlerOverCount[p.id] ?? 0) < (inn.bowlerOverCount[min.id] ?? 0) ? p : min,
+        pool[0]);
+        setNextBowler(pick.id, false);
+        toast(`Next over — ${pick.name}`);
+        return;
+      }
+    }
+    // auto next batsman
+    const needsBatter = !inn.currentStrikerId || (match.rules.nonStriker && !inn.currentNonStrikerId);
+    if (needsBatter && inn.balls.length > 0) {
+      const used = new Set<string>([
+        ...Object.keys(inn.batters),
+        inn.currentStrikerId ?? "",
+        inn.currentNonStrikerId ?? "",
+      ]);
+      const next = battingTeam.players.find((p) => !used.has(p.id));
+      if (next) selectNewBatsman(next.id);
+    }
+  }, [match.quick, inn.done, inn.currentBowlerId, inn.currentStrikerId, inn.currentNonStrikerId, inn.balls.length, inn.previousBowlerId, inn.excludedBowlerIdForPrompt, inn.bowlerOverCount, inn.batters, match.rules.overLimit, match.rules.nonStriker, bowlingTeam.players, battingTeam.players, setNextBowler, selectNewBatsman]);
+
 
   const [wicketOpen, setWicketOpen] = useState(false);
   const [extraDialog, setExtraDialog] = useState<null | "wide" | "noball" | "bye" | "legbye">(null);
@@ -636,7 +673,7 @@ function NextBowlerPrompt() {
   const setNextBowler = useApp((s) => s.setNextBowler);
   const setMiniCheckFull = useApp((s) => s.setMiniCheckFull);
   const inn = match.innings[match.currentInningsIndex];
-  const needs = !inn.done && inn.balls.length > 0 && !inn.currentBowlerId;
+  const needs = !inn.done && inn.balls.length > 0 && !inn.currentBowlerId && !match.quick;
   const [picked, setPicked] = useState<string>("");
   const [mini, setMini] = useState(false);
   if (!needs) return null;
@@ -705,7 +742,7 @@ function NewBatsmanPrompt() {
   const select = useApp((s) => s.selectNewBatsman);
   const setNonStrikerEnabled = useApp((s) => s.setNonStrikerEnabled);
   const inn = match.innings[match.currentInningsIndex];
-  if (inn.done) return null;
+  if (inn.done || match.quick) return null;
   const needs = !inn.currentStrikerId || (match.rules.nonStriker && !inn.currentNonStrikerId);
   if (!needs) return null;
   // Only after at least one ball (so initial openers aren't double-asked)

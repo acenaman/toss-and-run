@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useApp } from "@/lib/store";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,16 @@ export function SummaryScreen() {
   const finishMatch = useApp((s) => s.finishMatch);
   const setActive = useApp((s) => s.setActive);
   const navigate = useNavigate();
+
+  // Quick match: fast-forward to history with auto-picked MOM already applied.
+  useEffect(() => {
+    if (!match.quick) return;
+    finishMatch(match.manOfTheMatchId, match.manOfTheMatchTeamIndex);
+    setActive(null);
+    navigate({ to: "/history" });
+    toast.success("Quick match saved");
+  }, [match.quick, match.manOfTheMatchId, match.manOfTheMatchTeamIndex, finishMatch, setActive, navigate]);
+
   return (
     <MatchSummaryView match={match} onDone={() => {
       finishMatch(match.manOfTheMatchId, match.manOfTheMatchTeamIndex);

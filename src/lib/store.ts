@@ -90,6 +90,7 @@ interface AppState {
     settings: MatchSettings;
     teams: [TeamSquad, TeamSquad];
     rules: MatchRules;
+    quick?: boolean;
   }) => Match;
   updateMatch: (m: Match) => void;
   deleteMatch: (id: ID) => void;
@@ -220,7 +221,7 @@ export const useApp = create<AppState>((set, get) => ({
     persist(get);
   },
 
-  createMatch: ({ settings, teams, rules }) => {
+  createMatch: ({ settings, teams, rules, quick }) => {
     const id = uuid();
     const m: Match = {
       id,
@@ -233,6 +234,7 @@ export const useApp = create<AppState>((set, get) => ({
       teams,
       innings: [emptyInnings(0), emptyInnings(1)],
       currentInningsIndex: 0,
+      quick: quick || undefined,
     };
     set((s) => ({ matches: [...s.matches, m], activeMatchId: id }));
     persist(get);
@@ -269,6 +271,7 @@ export const useApp = create<AppState>((set, get) => ({
       m.innings[0] = emptyInnings(battingFirst);
       m.innings[1] = emptyInnings((battingFirst === 0 ? 1 : 0) as 0 | 1);
       m.currentInningsIndex = 0;
+      if (m.quick) autoFillOpeners(m, 0);
     });
   },
 
@@ -518,6 +521,7 @@ export const useApp = create<AppState>((set, get) => ({
           }
         } else {
           m.currentInningsIndex = 1;
+          if (m.quick) autoFillOpeners(m, 1);
         }
       }
     });
@@ -743,6 +747,24 @@ export const useApp = create<AppState>((set, get) => ({
     });
   },
 }));
+
+function autoFillOpeners(m: Match, inningsIdx: 0 | 1) {
+  const inn = m.innings[inningsIdx];
+  const battingTeam = m.teams[inn.battingTeamIndex];
+  const bowlingTeam = m.teams[inn.bowlingTeamIndex];
+  const striker = battingTeam.players[0]?.id;
+  const nonStriker = battingTeam.players[1]?.id;
+  const bowler = bowlingTeam.players[0]?.id;
+  if (!striker || !bowler) return;
+  inn.currentStrikerId = striker;
+  inn.currentNonStrikerId = m.rules.nonStriker ? nonStriker : undefined;
+  inn.currentBowlerId = bowler;
+  inn.wicketkeeperId = bowlingTeam.wicketkeeperId ?? bowlingTeam.players[0]?.id;
+  ensureBatter(inn, striker);
+  if (m.rules.nonStriker && nonStriker) ensureBatter(inn, nonStriker);
+  ensureBowler(inn, bowler);
+  if (m.rules.lastBallFreeHit && inn.legalBalls % 6 === 5) inn.freeHitNext = true;
+}
 
 function formatDismissal(m: Match, w: Wicket): string {
   const bowler = nameFor(m, m.innings[m.currentInningsIndex].currentBowlerId);

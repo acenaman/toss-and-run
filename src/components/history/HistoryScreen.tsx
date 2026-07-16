@@ -14,7 +14,7 @@ export function HistoryScreen() {
   const deleteMatch = useApp((s) => s.deleteMatch);
   const resumeMatch = useApp((s) => s.resumeMatch);
   const navigate = useNavigate();
-  const [filter, setFilter] = useState<"all" | "completed" | "quit">("all");
+  const [filter, setFilter] = useState<"all" | "completed" | "quit" | "quick">("all");
   const [view, setView] = useState<string | null>(null);
   const [team1, setTeam1] = useState("");
   const [team2, setTeam2] = useState("");
@@ -27,7 +27,12 @@ export function HistoryScreen() {
 
   const list = useMemo(() => {
     return matches
-      .filter((m) => filter === "all" ? m.status !== "in_progress" : m.status === filter)
+      .filter((m) => {
+        if (m.status === "in_progress") return false;
+        if (filter === "quick") return !!m.quick;
+        if (filter === "all") return !m.quick;
+        return m.status === filter && !m.quick;
+      })
       .filter((m) => {
         if (!team1) return true;
         const names = m.teams.map((t) => t.name);
@@ -42,10 +47,11 @@ export function HistoryScreen() {
     <div className="space-y-3 pb-4">
       <h2 className="text-2xl">History</h2>
       <Tabs value={filter} onValueChange={(v) => setFilter(v as any)}>
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
           <TabsTrigger value="quit">Quitted</TabsTrigger>
+          <TabsTrigger value="quick">Quick</TabsTrigger>
         </TabsList>
       </Tabs>
       <div className="grid grid-cols-2 gap-2">
@@ -74,6 +80,7 @@ export function HistoryScreen() {
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">
                   {new Date(m.createdAt).toLocaleDateString()} · {m.settings.overs} ov
                 </div>
+                {m.quick && <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full mr-1">QUICK</span>}
                 {isQuit && <span className="text-[10px] bg-warning text-warning-foreground px-2 py-0.5 rounded-full">QUITTED</span>}
               </div>
               <div className="flex justify-between items-center">

@@ -25,7 +25,18 @@ export function ScorecardView({ match }: { match: Match }) {
           <div className="text-center text-xs uppercase tracking-[0.3em] text-muted-foreground">Gully Cricket Scorer</div>
           <div className="text-center text-lg font-display tracking-wider">{match.teams[0].name} vs {match.teams[1].name}</div>
           {match.resultText && <div className="text-center text-primary font-semibold mt-1">{match.resultText}</div>}
-          <div className="text-center text-xs text-muted-foreground">{new Date(match.createdAt).toLocaleString()} · {match.settings.overs} ov</div>
+          <div className="text-center text-xs text-muted-foreground">{new Date(match.createdAt).toLocaleString()} · {match.settings.overs} ov{match.quick ? " · Quick match" : ""}</div>
+          {match.manOfTheMatchId && (() => {
+            const mom = match.teams.flatMap((t, ti) => t.players.map((p) => ({ ...p, ti }))).find((p) => p.id === match.manOfTheMatchId);
+            if (!mom) return null;
+            return (
+              <div className="mt-2 text-center text-sm">
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 text-primary px-3 py-1 border border-primary/30">
+                  🏆 Man of the Match — <span className="font-semibold">{mom.name}</span> <span className="text-xs text-muted-foreground">({match.teams[mom.ti].name})</span>
+                </span>
+              </div>
+            );
+          })()}
         </Card>
 
         <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
