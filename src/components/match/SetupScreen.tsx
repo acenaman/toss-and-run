@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { Plus, Minus, X, Camera } from "lucide-react";
+import { Plus, Minus, X, Camera, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { useApp, DEFAULT_RULES, makePlayer, makeSavedTeam } from "@/lib/store";
-import type { Player, SavedTeam, TeamSquad } from "@/lib/types";
+import type { Player, TeamSquad } from "@/lib/types";
 import { toast } from "sonner";
 
 function Stepper({ value, onChange, min, max, label, allowUnlimited }: { value: number | null; onChange: (v: number | null) => void; min: number; max: number; label: string; allowUnlimited?: boolean }) {
@@ -28,13 +29,34 @@ export function SetupScreen() {
   const upsertTeam = useApp((s) => s.upsertTeam);
   const createMatch = useApp((s) => s.createMatch);
 
+  const [quick, setQuick] = useState(false);
   const [overs, setOvers] = useState(5);
   const [players, setPlayers] = useState(8);
   const [series, setSeries] = useState(1);
   const [t1, setT1] = useState<TeamDraft>(emptyDraft());
   const [t2, setT2] = useState<TeamDraft>(emptyDraft());
 
+  const startQuick = () => {
+    const mk = (letter: "A" | "B"): TeamSquad => {
+      const ps: Player[] = Array.from({ length: players }, (_, i) => makePlayer(`Player ${letter}${i + 1}`));
+      return {
+        name: `Team ${letter}`,
+        players: ps,
+        captainId: ps[0].id,
+        wicketkeeperId: ps[0].id,
+      };
+    };
+    createMatch({
+      settings: { overs, players, series, matchIndexInSeries: 1 },
+      teams: [mk("A"), mk("B")],
+      rules: DEFAULT_RULES,
+      quick: true,
+    });
+    toast.success("Quick match created — set rules");
+  };
+
   const proceed = () => {
+    if (quick) return startQuick();
     const v1 = validate(t1, players);
     const v2 = validate(t2, players);
     if (v1) return toast.error(`Team 1: ${v1}`);
@@ -72,17 +94,25 @@ export function SetupScreen() {
     <div className="space-y-3 pb-4">
       <h2 className="text-2xl">New Match</h2>
 
+      <Card className="p-4 flex items-center justify-between">
+        <div>
+          <div className="text-sm font-semibold flex items-center gap-1.5"><Zap className="w-4 h-4 text-primary" />Quick Match</div>
+          <div className="text-xs text-muted-foreground">Auto teams & players · no stats saved · zero setup taps</div>
+        </div>
+        <Switch checked={quick} onCheckedChange={setQuick} />
+      </Card>
+
       <Card className="p-4 space-y-3">
         <div className="text-sm font-semibold text-primary uppercase tracking-wider">Match Settings</div>
         <Stepper label="Overs per innings" value={overs} onChange={(v) => setOvers(v as number)} min={1} max={100} />
         <Stepper label="Players per team" value={players} onChange={(v) => setPlayers(v as number)} min={1} max={15} />
-        <Stepper label="Matches in series" value={series} onChange={(v) => setSeries(v as number)} min={1} max={10} />
+        {!quick && <Stepper label="Matches in series" value={series} onChange={(v) => setSeries(v as number)} min={1} max={10} />}
       </Card>
 
-      <TeamPicker label="Team 1" expected={players} draft={t1} setDraft={setT1} otherSourceId={t2.sourceTeamId} />
-      <TeamPicker label="Team 2" expected={players} draft={t2} setDraft={setT2} otherSourceId={t1.sourceTeamId} />
+      {!quick && <TeamPicker label="Team 1" expected={players} draft={t1} setDraft={setT1} otherSourceId={t2.sourceTeamId} />}
+      {!quick && <TeamPicker label="Team 2" expected={players} draft={t2} setDraft={setT2} otherSourceId={t1.sourceTeamId} />}
 
-      <Button className="w-full h-12 text-base" onClick={proceed}>Next — Match Rules</Button>
+      <Button className="w-full h-12 text-base" onClick={proceed}>{quick ? "Start Quick Match →" : "Next — Match Rules"}</Button>
     </div>
   );
 }
