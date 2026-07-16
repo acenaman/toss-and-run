@@ -673,7 +673,7 @@ function NextBowlerPrompt() {
   const setNextBowler = useApp((s) => s.setNextBowler);
   const setMiniCheckFull = useApp((s) => s.setMiniCheckFull);
   const inn = match.innings[match.currentInningsIndex];
-  const needs = !inn.done && inn.balls.length > 0 && !inn.currentBowlerId;
+  const needs = !inn.done && inn.balls.length > 0 && !inn.currentBowlerId && !match.quick;
   const [picked, setPicked] = useState<string>("");
   const [mini, setMini] = useState(false);
   if (!needs) return null;
@@ -742,7 +742,7 @@ function NewBatsmanPrompt() {
   const select = useApp((s) => s.selectNewBatsman);
   const setNonStrikerEnabled = useApp((s) => s.setNonStrikerEnabled);
   const inn = match.innings[match.currentInningsIndex];
-  if (inn.done) return null;
+  if (inn.done || match.quick) return null;
   const needs = !inn.currentStrikerId || (match.rules.nonStriker && !inn.currentNonStrikerId);
   if (!needs) return null;
   // Only after at least one ball (so initial openers aren't double-asked)
