@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import {
   getCloudUser,
   onCloudAuthChange,
+  onAuthBroadcast,
+  broadcastAuthChange,
   readCloudSnapshot,
   signInWithGoogle,
   signOutCloud,
@@ -105,7 +107,9 @@ export function CloudSyncStatus() {
       setUser(u);
       markSynced(u ? "idle" : "guest", null);
       if (u) void syncNow();
+      broadcastAuthChange();
     });
+    const unsubBroadcast = onAuthBroadcast(() => void check());
     const onFocus = () => void check();
     window.addEventListener("focus", onFocus);
     window.addEventListener("pageshow", onFocus);
@@ -114,6 +118,7 @@ export function CloudSyncStatus() {
       cancelled = true;
       retries.forEach((id) => window.clearTimeout(id));
       unsub();
+      unsubBroadcast();
       window.removeEventListener("focus", onFocus);
       window.removeEventListener("pageshow", onFocus);
       document.removeEventListener("visibilitychange", onFocus);
