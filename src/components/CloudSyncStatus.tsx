@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import {
   getCloudUser,
   onCloudAuthChange,
+  onAuthBroadcast,
+  broadcastAuthChange,
   readCloudSnapshot,
   signInWithGoogle,
   signOutCloud,
