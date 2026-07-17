@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
 
 import logoAsset from "@/assets/logo.png.asset.json";
 
@@ -47,11 +49,36 @@ function Splash() {
 
     hydrate();
 
+    // Consume any OAuth tokens returned in the URL (hash or ?code=).
+    void (async () => {
+      try {
+        if (typeof window === "undefined") return;
+        const hash = window.location.hash || "";
+        const search = window.location.search || "";
+        if (hash.includes("access_token") || hash.includes("refresh_token")) {
+          const params = new URLSearchParams(hash.replace(/^#/, ""));
+          const access_token = params.get("access_token");
+          const refresh_token = params.get("refresh_token");
+          if (access_token && refresh_token) {
+            await supabase.auth.setSession({ access_token, refresh_token });
+          }
+          history.replaceState(null, "", window.location.pathname);
+        } else if (/[?&]code=/.test(search)) {
+          await supabase.auth.exchangeCodeForSession(window.location.href);
+          history.replaceState(null, "", window.location.pathname);
+        } else {
+          // Force client init so detectSessionInUrl runs.
+          await supabase.auth.getSession();
+        }
+      } catch { /* noop */ }
+    })();
+
     const t = setTimeout(() => setReady(true), 1600);
 
     return () => clearTimeout(t);
 
   }, [hydrate]);
+
 
 
 
