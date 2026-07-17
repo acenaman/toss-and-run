@@ -107,7 +107,9 @@ export function CloudSyncStatus() {
       setUser(u);
       markSynced(u ? "idle" : "guest", null);
       if (u) void syncNow();
+      broadcastAuthChange();
     });
+    const unsubBroadcast = onAuthBroadcast(() => void check());
     const onFocus = () => void check();
     window.addEventListener("focus", onFocus);
     window.addEventListener("pageshow", onFocus);
