@@ -118,6 +118,7 @@ export function CloudSyncStatus() {
       cancelled = true;
       retries.forEach((id) => window.clearTimeout(id));
       unsub();
+      unsubBroadcast();
       window.removeEventListener("focus", onFocus);
       window.removeEventListener("pageshow", onFocus);
       document.removeEventListener("visibilitychange", onFocus);
